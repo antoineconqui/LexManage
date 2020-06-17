@@ -7,3 +7,6 @@ firebase.initializeApp({
   messagingSenderId: "1049922380151",
   appId: "1:1049922380151:web:05945fedfe1af325ff8172",
 });
+
+var database = firebase.firestore();
+var storage = firebase.storage().ref();

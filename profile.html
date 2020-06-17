@@ -1,60 +1,30 @@
-<html>
-  <head>
-    <title>Lex Manage</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="./style/style.css" />
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-  </head>
+<h1>Profil</h1>
+<div class="container" id="infos">
+  <h3>Informations Personnelles</h3>
+  <img class="userPicture" id="picture" src="" alt="" />
+  <h4>Username</h4>
+  <p id="username"></p>
+  <h4>Email</h4>
+  <p id="email"></p>
+  <h4>Password</h4>
+  <p id="password"></p>
+</div>
 
-  <body>
-    <a href="./index.html">
-      <h1>Lex Manage</h1>
-    </a>
-    <h2>Profil</h2>
+<div class="container" id="plan" hidden>
+  <h3>Abonnement</h3>
+</div>
 
-    <nav class="nav flex-column">
-      <a class="nav-link" href="#infos">Informations Personnelles</a>
-      <a class="nav-link disabled" href="#plan">Abonnement</a>
-      <a class="nav-link" href="#settings">Parametres</a>
-    </nav>
+<div class="container" id="settings">
+  <h3>Parametres</h3>
+  <button id="signOutButton" type="button" class="btn btn-primary">
+    Deconnexion
+  </button>
+  <br />
+  <button id="accountSuspensionButton" type="button" class="btn btn-danger">
+    Suspension du compte
+  </button>
+</div>
 
-    <div class="container">
-      <div id="infos">
-        <h3>Informations Personnelles</h3>
-        <img class="userPicture" id="picture" src="" alt="" />
-        <h4>Username</h4>
-        <p id="username"></p>
-        <h4>Email</h4>
-        <p id="email"></p>
-        <h4>Password</h4>
-        <p id="password"></p>
-      </div>
-
-      <div id="plan" hidden>
-        <h3>Abonnement</h3>
-      </div>
-
-      <div id="settings">
-        <h3>Parametres</h3>
-        <button id="signOutButton" type="button" class="btn btn-primary">
-          Deconnexion
-        </button>
-        <br />
-        <button id="accountSuspensionButton" type="button" class="btn btn-danger">
-          Suspension du compte
-        </button>
-      </div>
-    </div>
-
-    <script src="https://www.gstatic.com/firebasejs/7.14.5/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/7.14.5/firebase-auth.js"></script>
-    <!-- <script src="https://www.gstatic.com/firebasejs/7.14.5/firebase-firestore.js"></script> -->
-    <!-- <script src="https://www.gstatic.com/firebasejs/7.14.5/firebase-storage.js"></script> -->
-
-    <script src="./script/config.js"></script>
-    <script src="./script/authState.js"></script>
-    <script src="./script/profile.js"></script>
-  </body>
-</html>
+<script>
+  $.getScript("./script/profile.js");
+</script>

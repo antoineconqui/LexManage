@@ -1,11 +1,24 @@
 var ui = new firebaseui.auth.AuthUI(firebase.auth());
 
-var user;
-
 var uiConfig = {
   callbacks: {
     signInSuccessWithAuthResult: function (authResult, redirectUrl) {
-      return true;
+      if (authResult.additionalUserInfo.isNewUser) {
+        var docRef = database.collection("users").doc();
+        docRef
+          .set({
+            date: new Date(),
+            name: authResult.user.displayName,
+            email: authResult.user.email,
+            profilePicture: authResult.user.photoURL,
+            contacts: [],
+          })
+          .then(() => {
+            console.log("test");
+            return true;
+          });
+      }
+      // return true;
     },
   },
   credentialHelper: firebaseui.auth.CredentialHelper.NONE,

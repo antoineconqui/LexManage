@@ -1,4 +1,185 @@
-.userPicture{
-    width: 50;
-    height: 50;
+@import url("https://fonts.googleapis.com/css?family=Raleway");
+
+body {
+  --dark: #085a5b;
+  --middle: #098e8f;
+  --light: #e5e5e5;
+  --complementaire: #f58a22;
+  color: var(--middle);
+  font-family: "Raleway";
+}
+
+/* Header */
+
+#header {
+  height: 50px;
+  background-color: var(--middle);
+  color: white;
+  border-bottom: solid var(--middle) 1px;
+}
+
+h1 {
+  text-align: center;
+}
+
+h1 > span {
+  font-size: small;
+}
+
+h2 {
+  text-align: center;
+}
+
+/* Main */
+
+#main {
+  height: calc(100% - 50px);
+}
+
+#main #firebaseui-auth-container {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+/* Sidebar */
+
+#sidebar li {
+  font-size: 26px;
+  border-radius: 10px;
+  border: solid white 1px;
+  margin-top: 10px;
+}
+
+#sidebar li.selected {
+  color: white;
+  background-color: var(--middle);
+}
+
+#sidebar li:hover:not(.selected) {
+  background-color: white;
+  border: solid var(--middle) 1px;
+}
+
+li > svg,
+li > img {
+  width: 30px;
+  height: 30px;
+  vertical-align: text-top;
+  margin-right: 10px;
+}
+
+li > img {
+  border-radius: 50%;
+}
+
+/* Middle */
+
+#middle {
+  border-left: solid var(--middle) 1px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+/* Sidebar */
+
+#settings {
+  border-left: solid var(--middle) 1px;
+}
+
+/* Folders */
+
+.center {
+  margin-top: auto;
+  margin-bottom: auto;
+  text-align: center;
+}
+
+.validButton {
+  padding: 0.375rem 0.75rem;
+  background-color: white;
+  color: var(--middle);
+  border: solid var(--middle) 1px;
+  border-radius: 5px;
+
+  transition-duration: 0.5s;
+  transition-property: color, background-color;
+  transition-timing-function: ease-out;
+}
+
+.validButton:hover {
+  background-color: var(--middle);
+  color: white;
+}
+
+.cancelButton {
+  padding: 0.375rem 0.75rem;
+  background-color: white;
+  color: red;
+  border: solid red 1px;
+  border-radius: 5px;
+
+  transition-duration: 0.5s;
+  transition-property: color, background-color;
+  transition-timing-function: ease-out;
+}
+
+.cancelButton:hover {
+  background-color: red;
+  color: white;
+}
+
+.modal h5 {
+  margin-left: 5%;
+  margin-top: 10px;
+}
+
+.modal input {
+  width: 80%;
+  margin-left: 10%;
+}
+
+.folder,
+.file {
+  height: 100px;
+  margin: 10px;
+  border: var(--middle) solid 1px;
+  border-radius: 10px;
+  cursor: pointer;
+
+  transition-duration: 0.5s;
+  transition-property: color, background-color;
+  transition-timing-function: ease-out;
+}
+
+.folder.selected,
+.file.selected {
+  background-color: var(--middle);
+  color: white;
+}
+
+.folderTitle,
+.fileTitle {
+  font-size: x-large;
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 10px;
+}
+
+.folderDate,
+.fileDate {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  margin: 10px;
+}
+
+.fileSize {
+}
+
+/* Profile */
+
+.userPicture {
+  width: 50px;
+  height: 50px;
 }
