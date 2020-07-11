@@ -44,12 +44,13 @@ function createNewFolder() {
   docRef
     .set({
       client: clients[$("#inputClient").val()],
+      complete: false,
       creationDate: new Date($("#inputDate").val()),
       documents: documents[$("#inputKit").val()].documents,
       kit: kits[$("#inputKit").val()],
       paymentStatus: $("#inputStatus").val(),
       responsable: members[$("#inputResponsable").val()],
-      tasks: [{ title: "Commande", complete: true }],
+      tasks: [{ title: "Commande effectuée", complete: false }],
       title: documents[$("#inputKit").val()].title,
     })
     .then(() => {
