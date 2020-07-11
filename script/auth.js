@@ -1,3 +1,7 @@
+// Init
+
+var workspace = null;
+
 var ui = new firebaseui.auth.AuthUI(firebase.auth());
 
 var uiConfig = {
@@ -12,18 +16,20 @@ var uiConfig = {
             email: authResult.user.email,
             profilePicture: authResult.user.photoURL,
             contacts: [],
+            admin: false,
           })
           .then(() => {
-            console.log("test");
-            return true;
+            console.log(redirectUrl);
+            window.location.replace("./index.html");
           });
+      } else {
+        window.location.replace("./index.html");
       }
-      // return true;
     },
   },
   credentialHelper: firebaseui.auth.CredentialHelper.NONE,
   signInFlow: "popup",
-  signInSuccessUrl: "./index.html",
+  // signInSuccessUrl: "./index.html",
   signInOptions: [
     {
       provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
@@ -44,3 +50,11 @@ var uiConfig = {
 };
 
 ui.start("#firebaseui-auth-container", uiConfig);
+
+// ui.start("#firebaseui-auth-container-2", uiConfig);
+
+// Listeners
+
+$("#submitWorkspaceButton").click(() => {
+  workspace = $("#workspaceNameInput").val();
+});

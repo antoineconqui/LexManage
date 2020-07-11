@@ -24,7 +24,7 @@ function updateContacts() {
     .then(function (querySnapshot) {
       querySnapshot.forEach((postDoc) => {
         postDoc.data().contacts.forEach((contact) => {
-          contact.push({
+          contacts.push({
             id: postDoc.id,
             name: postDoc.data().name,
             email: postDoc.data().email,
@@ -34,6 +34,7 @@ function updateContacts() {
       });
     })
     .then(() => {
+      // console.log(contacts);
       for (let i = 0; i < contacts.length; i++) displayContact(i, contacts[i]);
     });
 }

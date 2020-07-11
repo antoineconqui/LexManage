@@ -1,0 +1,92 @@
+<div id="folders">
+  <div class="row">
+    <div class="col-4 offset-4 center">
+      <h1>Mes dossiers</h1>
+    </div>
+    <div class="col-4 center">
+      <button class="validButton" id="newFolderButton" data-toggle="modal" data-target="#newFolderModal">
+        Nouveau Dossier
+      </button>
+    </div>
+  </div>
+  <div id="foldersDisplayer"></div>
+</div>
+
+<div id="folder" style="display: none;">
+  <div class="row">
+    <div class="col-2 center">
+      <button class="cancelButton hvr-underline-from-center" id="backButton">Back</button>
+    </div>
+    <div class="col-6 offset-md-1 center">
+      <h1 id="folderTitle" />
+    </div>
+    <div class="col-2 center">
+      <button class="validButton" id="newFileButton" data-toggle="modal" data-target="#newFileModal">
+        Nouveau Document
+      </button>
+    </div>
+  </div>
+  <div id="statut"></div>
+  <div id="documents"></div>
+</div>
+
+<div id="newFolderModal" class="modal fade">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Créer un nouveau dossier</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <h5>Type de Kit</h5>
+        <select id="inputKit" name="folderKit"> </select>
+
+        <h5>Client</h5>
+        <select id="inputClient" name="folderClient"></select>
+
+        <h5>Date de commande</h5>
+        <input id="inputDate" type="date" name="folderDate" />
+
+        <h5>Statut du paiement</h5>
+        <select id="inputStatus" name="folderPaymentStatus">
+          <option value="waiting">En attente de facture</option>
+          <option value="unpaid">En attente de paiement</option>
+          <option value="paid">Payé</option>
+        </select>
+
+        <h5>Responsable du dossier</h5>
+        <select id="inputResponsable" name="folderResponsable"></select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn cancelButton" data-dismiss="modal">Annuler</button>
+        <button type="button" class="btn validButton" data-dismiss="modal" id="folderSubmitButton">Créer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="newFileModal" class="modal fade">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Ajouter un nouveau document</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <button id="inputButton">Sélectionner un document</button>
+
+        <div id="filesUploader"></div>
+
+        <button id="filesSubmitButton" style="display: none;">Envoyer</button>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" id="foldersSubmitButton">Créer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $.getScript("./script/folders.js");
+  $.getScript("./script/folders-admin.js");
+</script>

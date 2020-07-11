@@ -1,68 +1,64 @@
 // Init
 
-var userFolders = [];
 var userFiles = [];
 var filesInput = [];
 
 var selectedFolder = null;
 
-var uploadCounter = 0;
-
 firebase.auth().onAuthStateChanged(() => {
   updateFolders();
 });
 
-// Files
+// General Functions
 
-function createFile(i, fileObject) {
+function createFile(folder, documentN, fileN, fileObject) {
   var docRef = database.collection("files").doc();
 
-  var fileRef = storage.child(firebase.auth().currentUser.email + "/" + selectedFolder + "/" + docRef.id); // );
+  var fileRef = storage.child(docRef.id);
 
   var uploadTask = fileRef.put(fileObject);
 
   uploadTask.on(
     firebase.storage.TaskEvent.STATE_CHANGED,
     function (snapshot) {
-      var percent = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-      $("#progressBar" + i).attr("value", percent);
+      $("#inputProgress").attr("value", (snapshot.bytesTransferred / snapshot.totalBytes) * 100);
     },
     function (error) {
       console.log(error);
     },
     function () {
-      uploadCounter++;
-      $("#progressBar" + i).hide();
-      $("#check" + i).show();
+      $("#inputProgress").hide();
+      $("#inputCheck").show();
     }
   );
 
-  var name = $("#customName" + i).val() != "" ? $("#customName" + i).val() : fileObject.name;
   uploadTask.then((snapshot) => {
     snapshot.ref.getDownloadURL().then((url) => {
       docRef.set({
+        comments: "",
         date: new Date(),
-        folder: selectedFolder,
         link: url,
-        name: name,
-        owner: firebase.auth().currentUser.email,
+        owner: folder.owner,
         size: fileObject.size,
-        visible: true,
+        version: folder.documents[documentN].files[fileN].versions.length + 1,
+      });
+      var documents;
+      folder.ref.get().then((doc) => {
+        documents = doc.data().documents;
+        documents[documentN].files[fileN].versions.push(docRef);
+        folder.ref.update({
+          documents: documents,
+        });
+      });
+      folder.ref.get().then((doc) => {
+        var folder = doc.data();
+        folder.id = doc.id;
+        folder.ref = doc.ref;
+        updateDocuments(folder);
       });
     });
-    console.log(uploadCounter);
-    console.log(filesInput.length);
-    if (uploadCounter == filesInput.length) {
-      $("#filesUploader").html("<p>Les fichiers ont tous bien été envoyés</p>");
-      $("#filesSubmitButton").hide();
-      $("#fileInput").val("");
-      uploadCounter = 0;
-      updateFiles();
-    }
   });
 }
-
-// function updateFile(i, fileObject) {}
 
 function sizeDisplayer(size) {
   units = ["o", "Ko", "Mo", "Go"];
@@ -74,27 +70,130 @@ function sizeDisplayer(size) {
   return Math.round(size * 100) / 100 + " " + units[i];
 }
 
-function displayInput(i, fileObject) {
-  var file = $("<div id='fileInput" + i + "'></div>");
-  var fileName = $("<p>" + fileObject.name + "</p>");
-  var customName = $("<input type='text' id='customName" + i + "'/>");
-  var fileSize = $("<p>" + sizeDisplayer(fileObject.size) + "</p>");
-  var fileProgress = $("<progress id='progressBar" + i + "' max='100' value='0'></progress>");
-  var fileComplete = $("<p id='check" + i + "' style='display: none;'>✓</p>");
-  file.append(fileName, customName, fileSize, fileProgress, fileComplete);
-  $("#filesUploader").append(file);
+// Folders
+
+function updateFolders() {
+  $("#foldersDisplayer").empty();
+  database
+    .collection("folders")
+    .where("owner", "==", userRef)
+    .orderBy("creationDate", "desc")
+    .get()
+    .then(function (querySnapshot) {
+      querySnapshot.forEach((doc) => {
+        var folder = doc.data();
+        folder.id = doc.id;
+        folder.ref = doc.ref;
+        displayFolder(folder);
+      });
+    });
 }
 
-function displayFile(i, fileObject) {
-  var file = $("<div class='col-lg-4 col-md-6 file' id='file" + i + "'></div>");
-  var fileName = $("<div class='fileTitle'>" + fileObject.name + "</div>");
-  var fileSize = $("<div class='fileSize'>" + sizeDisplayer(fileObject.size) + "</div>");
-  var downloadButton = $(
-    "<a class='downloadButton' href='" + fileObject.link + "' download><button>Download</button></a>"
-  );
-  var shareButton = $("<button class='shareButton'>Share</button>");
+function displayFolder(folder) {
+  folder.responsable.get().then(function (doc) {
+    var task = { complete: true };
+    var value = 1;
+    for (let i = 0; i < folder.tasks.length; i++) {
+      if (!folder.tasks[i].complete) {
+        task = folder.tasks[i];
+        value = i / folder.tasks.length;
+        break;
+      }
+    }
+
+    var folderWidget = $("<div class='folder row'/>");
+
+    var leftPanel = $('<div class="col-md-6"/>');
+    var folderTitle = $("<div class='title'>" + folder.title + "</div>");
+    var folderTask = $('<div class="folderTask"/>');
+    var taskTitle = $("<div class='taskTitle'>" + (task.complete ? "Dossier complet" : "Tâche en cours : " + task.title) + "</div>");
+    var taskProgress = $("<meter class='taskProgress' value='" + value + "'/>");
+    folderTask.append(taskTitle, taskProgress);
+    leftPanel.append(folderTitle, folderTask);
+
+    var rightPanel = $('<div class="col-md-6"/>');
+    var folderStatus = $("<div class='folderStatus'><b>Statut du paiement : </b></br><span>" + folder.paymentStatus + "</span></div>");
+    var folderDate = $("<div class='folderDate'><b>Date de Création : </b></br><span>" + new Date(folder.creationDate.seconds * 1000).toLocaleDateString() + "</span></div>");
+    var folderResponsable = $("<div class='folderResponsable'><b>Responsable du Dossier :  </b></br><span>" + doc.data().name + "</span></div>");
+    var folderButton = $("<button class='folderButton validButton'>Ouvrir</div>");
+    rightPanel.append(folderStatus, folderDate, folderResponsable, folderButton);
+
+    folderWidget.append(leftPanel, rightPanel);
+
+    folderButton.click(() => {
+      openFolder(folder);
+      $("#folders").hide();
+      $("#folder").show();
+    });
+
+    $("#foldersDisplayer").append(folderWidget);
+  });
+}
+
+function openFolder(folder) {
+  $("#folderTitle").html(folder.title);
+  updateStatus(folder);
+  updateDocuments(folder);
+}
+
+function updateStatus(folder) {
+  $("#statut").html("<h3>Statut du dossier</h3>");
+  var paiement = $('<div id="paiement"></div>');
+  var paiementTitle = $("<b>Statut du paiement : </b>");
+  var paiementStatus = $("<span>" + folder.paymentStatus + "</span>");
+  paiement.append(paiementTitle, paiementStatus);
+
+  var avancee = $('<div id="avancee"/>');
+  var avanceeTitle = $('<div class="title">Avancée du dossier</div>');
+  var value = 1;
+  for (let i = 0; i < folder.tasks.length; i++) {
+    if (!folder.tasks[i].complete) {
+      value = i / folder.tasks.length;
+      break;
+    }
+  }
+  var tasksProgress = $('<meter class="taskProgress" value="' + value + '"/>');
+
+  var tasks = "<ul>";
+  for (let i = 0; i < folder.tasks.length; i++) {
+    const task = folder.tasks[i];
+    var tasks = tasks + '<li class="task ' + (task.complete ? "complete" : "") + '">' + task.title + "</li> ";
+  }
+  tasks = tasks + '<li class="task ' + (folder.tasks[folder.tasks.length - 1].complete ? "complete" : "") + '">Dossier Complet</li></ul>';
+
+  avancee.append(avanceeTitle, tasksProgress, $(tasks));
+
+  $("#statut").append(paiement, avancee);
+}
+
+function updateDocuments(folder) {
+  $("#documents").empty();
+  for (let d = 0; d < folder.documents.length; d++) {
+    const document = folder.documents[d];
+    var documentWidget = $('<div class="document"><h4>' + document.title + "</h4></div>");
+    for (let f = 0; f < document.files.length; f++) {
+      documentWidget.append(displayFile(document.files[f], folder, d, f));
+    }
+    $("#documents").append(documentWidget);
+  }
+}
+
+function displayFile(file, folder, d, f) {
+  var fileWidget = $('<div class="file col-6"></div>');
+  var fileName = $("<div class='title'>" + file.title + " </div>");
+  if (file.versions.length > 0) {
+    var fileVersion = $("<span>(version " + file.versions.length + ")</span>");
+    fileName.append(fileVersion);
+  }
+  fileWidget.append(fileName);
+  var fileButtons = $('<div class="buttons"></div>');
+  if (file.versions.length != 0) {
+    var downloadButton = $("<div><a href='" + file.versions[file.versions.length - 1].link + "' download><button class='validButton' >Download</button></a></div>");
+    fileButtons.append(downloadButton);
+  }
+  var shareButton = $("<div><button class='validButton'>Share</button></div>");
   shareButton.click(() => {});
-  var deleteButton = $("<button class='deleteButton'>Delete</button>");
+  var deleteButton = $("<button class='cancelButton'>Delete</button>");
   deleteButton.click(() => {
     var confirmation = confirm("Etes vous sûr de vouloir supprimer ?");
     if (confirmation) {
@@ -103,187 +202,57 @@ function displayFile(i, fileObject) {
           visible: false,
         })
         .then(() => {
-          updateFiles();
+          updateDocuments();
         });
     }
   });
-  file.append(fileName, fileSize, downloadButton, shareButton, deleteButton);
-  $("#filesDisplayer").append(file);
-}
-
-function updateFiles() {
-  $("#filesDisplayer").html("<h4>Mes documents</h4>");
-  $("#folderTitle").html(selectedFolder);
-  userFiles = [];
-  database
-    .collection("files")
-    .where("owner", "==", firebase.auth().currentUser.email)
-    .where("folder", "==", selectedFolder)
-    .where("visible", "==", true)
-    .orderBy("date", "desc")
-    .get()
-    .then(function (querySnapshot) {
-      querySnapshot.forEach((postDoc) => {
-        userFiles.push({
-          id: postDoc.id,
-          ref: postDoc.ref,
-          name: postDoc.data().name,
-          owner: postDoc.data().owner,
-          size: postDoc.data().size,
-          // accesses: postDoc.data().accesses,
-          link: postDoc.data().link,
-        });
-      });
-    })
-    .then(() => {
-      for (let i = 0; i < userFiles.length; i++) displayFile(i, userFiles[i]);
+  if (file.client_edition) {
+    var filesInput;
+    var fileUploader = $('<div id="fileUploader"/>');
+    var uploadInput = $('<input id="fileInput" type="file" style="display: none;" />');
+    uploadInput.change(() => {
+      filesInput = event.target.files;
+      if (filesInput.length > 0) {
+        fileUploader.html(displayInput(filesInput[0], folder, d, f));
+        uploadButton.hide();
+        fileButtons.hide();
+      }
     });
-}
-
-// Folders
-
-function createNewFolder() {
-  var docRef = database.collection("folders").doc();
-
-  storage.child(firebase.auth().currentUser.email + "/" + docRef.id);
-
-  docRef.set({
-    date: new Date(),
-    name: $("#folderNameInput").val(),
-    owner: firebase.auth().currentUser.email,
-    collaborators: [],
-    // files: [],
-  });
-}
-
-function displayFolder(i, folderObject) {
-  var folder = $("<div class='col-lg-3 col-md-4 col-sm-6 folder' id='folder" + i + "'></div>");
-  var folderName = $("<div class='folderTitle'><h4>" + folderObject.name + "</h4></div>");
-  var folderCollaborators = $("<div class='folderCollaborators'>" + "" + "</div>");
-  var folderDate = $(
-    "<div class='folderDate'>" + new Date(folderObject.date.seconds * 1000).toLocaleDateString() + "</div>"
-  );
-  folder.append(folderName, folderCollaborators, folderDate);
-  folder.click(() => {
-    unselectFolders();
-    selectedFolder = folderObject.name;
-    folder.toggleClass("selected");
-  });
-  folder.dblclick(() => {
-    updateFiles();
-    $("#folders").hide();
-    $("#files").show();
-    $;
-  });
-  $("#foldersDisplayer").append(folder);
-}
-
-function unselectFolders() {
-  $(".folder").each(() => {
-    $(this).removeClass("selected");
-  });
-}
-
-function updateFolders() {
-  $("#filesDisplayer").empty();
-  userFolders = [];
-  database
-    .collection("folders")
-    .where("owner", "==", firebase.auth().currentUser.email)
-    .orderBy("date", "desc")
-    .get()
-    .then(function (querySnapshot) {
-      querySnapshot.forEach((postDoc) => {
-        userFolders.push({
-          id: postDoc.id,
-          name: postDoc.data().name,
-          date: postDoc.data().date,
-          owner: postDoc.data().owner,
-          collaborators: postDoc.data().collaborators,
-          files: postDoc.data().files,
-        });
-      });
-    })
-    .then(() => {
-      for (let i = 0; i < userFolders.length; i++) displayFolder(i, userFolders[i]);
+    var uploadButton = $("<div><button class='validButton'>" + (file.versions.length == 0 ? "Upload the File" : "Upload a New Version") + "</button></div>");
+    uploadButton.click(() => {
+      uploadInput.click();
     });
-}
-
-//Collaborators
-
-function displayCollaborator(i, collaboratorObject) {}
-
-function uploadList() {
-  collaborators = [];
-  database
-    .collection("users")
-    .where("email", "==", firebase.auth().currentUser.email)
-    .orderBy("date", "desc")
-    .get()
-    .then(function (querySnapshot) {
-      querySnapshot.forEach((postDoc) => {
-        userFolders.push({
-          id: postDoc.id,
-          name: postDoc.data().name,
-          date: postDoc.data().date,
-          owner: postDoc.data().owner,
-          collaborators: postDoc.data().collaborators,
-          files: postDoc.data().files,
-        });
-      });
-    })
-    .then(() => {
-      for (let i = 0; i < userFolders.length; i++) displayFolder(i, userFolders[i]);
-    });
-
-  var input = $("#collaboratorsInput");
-  var filter = input.value.toUpperCase();
-  var div = $("#collaboratorsDropdown");
-
-  var a = div.getElementsByTagName("a");
-  for (i = 0; i < a.length; i++) {
-    txtValue = a[i].textContent || a[i].innerText;
-    if (txtValue.toUpperCase().indexOf(filter) > -1) {
-      a[i].style.display = "";
-    } else {
-      a[i].style.display = "none";
-    }
+    fileWidget.append(fileUploader, uploadInput);
   }
+  fileButtons.append(uploadButton, shareButton); //deleteButton
+  fileWidget.append(fileButtons);
+  return fileWidget;
+}
+
+function displayInput(input, folder, d, f) {
+  var inputWidget = $("<div></div>");
+  var inputName = $("<p>" + input.name + "</p>");
+  var inputSize = $("<p>" + sizeDisplayer(input.size) + "</p>");
+  var inputProgress = $("<progress id='inputProgress' max='100' value='0'/>");
+  var inputCheck = $("<p id='inputCheck' style='display: none;'>✓</p>");
+  var inputSubmitButton = $('<button class="validButton">Valider</button>');
+  inputSubmitButton.click(() => {
+    $("#fileUploader").empty();
+    createFile(folder, d, f, input);
+  });
+  inputWidget.append(inputName, inputSize, inputProgress, inputCheck, inputSubmitButton);
+  return inputWidget;
 }
 
 // Listeners
 
-$("#inputButton").click(() => {
-  $("#fileInput").click();
-});
-
-$("#fileInput").change((event) => {
-  $("#filesUploader").empty();
-  filesInput = Array.from(event.target.files);
-  for (let i = 0; i < filesInput.length; i++) displayInput(i, filesInput[i]);
-  if (filesInput.length > 0) $("#filesSubmitButton").show();
-});
-
-$("#newFolderButton").click(() => {
-  $("#newFolderModal").show();
-  $("#folderNameInput").select();
-});
-
-$("#collaboratorsInput").change(() => {});
-
-$("#cancelFolderButton").click(() => {
-  $("#newFolderModal").hide();
-});
-
-$("#submitFolderButton").click(() => {
-  createNewFolder();
-});
-
-$("#filesSubmitButton").click(() => {
-  for (let i = 0; i < filesInput.length; i++) createFile(i, filesInput[i]);
-});
-
 $("#backButton").click(() => {
   $("#folders").show();
-  $("#files").hide();
+  $("#folder").hide();
+});
+
+$("#fileInput").change((event) => {});
+
+$("#filesSubmitButton").click(() => {
+  for (let i = 0; i < filesInput.length; i++);
 });

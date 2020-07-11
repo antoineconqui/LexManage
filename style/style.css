@@ -5,6 +5,7 @@ body {
   --middle: #098e8f;
   --light: #e5e5e5;
   --complementaire: #f58a22;
+  background-color: var(--light);
   color: var(--middle);
   font-family: "Raleway";
 }
@@ -15,7 +16,13 @@ body {
   height: 50px;
   background-color: var(--middle);
   color: white;
-  border-bottom: solid var(--middle) 1px;
+  border-bottom: solid var(--light) 1px;
+}
+
+#header img {
+  height: 40px;
+  width: auto;
+  margin: 5px;
 }
 
 h1 {
@@ -30,10 +37,54 @@ h2 {
   text-align: center;
 }
 
+/* Auth */
+
+.auth-card {
+  position: relative;
+  border: var(--middle) 1px solid;
+  border-radius: 10px;
+  text-align: center;
+  height: 260px;
+  width: 400px;
+  padding: 20px;
+  color: white;
+  background-color: var(--middle);
+}
+
+#creation h1 {
+  margin-top: 20px;
+}
+
+#creation button {
+  position: absolute;
+  bottom: 40px;
+  transform: translate(-50%, 0);
+}
+
+#creation button:hover {
+  background-color: white;
+  color: var(--middle);
+  box-shadow: 0px 0px 10px white;
+}
+
+#creation button:focus {
+  outline: 1px dotted;
+}
+
+.firebaseui-tos.firebaseui-tospp-full-message {
+  color: white;
+}
+
+.firebaseui-tos.firebaseui-tospp-full-message a {
+  color: white;
+  text-decoration: underline;
+}
+
 /* Main */
 
 #main {
   height: calc(100% - 50px);
+  justify-content: space-evenly;
 }
 
 #main #firebaseui-auth-container {
@@ -43,11 +94,22 @@ h2 {
 
 /* Sidebar */
 
+#sidebar {
+  /* position: fixed; */
+}
+
 #sidebar li {
+  /* background-color: white; */
+
   font-size: 26px;
   border-radius: 10px;
-  border: solid white 1px;
+  border: solid var(--light) 1px;
   margin-top: 10px;
+  cursor: pointer;
+
+  transition-duration: 0.5s;
+  transition-property: color, background-color;
+  transition-timing-function: ease-out;
 }
 
 #sidebar li.selected {
@@ -78,13 +140,15 @@ li > img {
   border-left: solid var(--middle) 1px;
   padding-top: 10px;
   padding-bottom: 10px;
+  height: 100%;
+  overflow: auto;
 }
 
-/* Sidebar */
+/* Sidebar
 
 #settings {
   border-left: solid var(--middle) 1px;
-}
+} */
 
 /* Folders */
 
@@ -133,53 +197,151 @@ li > img {
   margin-top: 10px;
 }
 
-.modal input {
+.modal input,
+.modal select {
   width: 80%;
   margin-left: 10%;
 }
 
 .folder,
 .file {
-  height: 100px;
-  margin: 10px;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  margin: 5px;
   border: var(--middle) solid 1px;
   border-radius: 10px;
-  cursor: pointer;
-
-  transition-duration: 0.5s;
-  transition-property: color, background-color;
-  transition-timing-function: ease-out;
+  background-color: white;
 }
 
-.folder.selected,
-.file.selected {
-  background-color: var(--middle);
-  color: white;
+.folder span {
+  text-align: right;
+  padding-left: 20px;
 }
 
-.folderTitle,
-.fileTitle {
+.title {
+  width: 100%;
+  text-align: center;
+  font-weight: bold;
   font-size: x-large;
-  position: absolute;
-  top: 0;
-  left: 0;
-  margin: 10px;
+  margin-bottom: 15px;
 }
 
+.title span {
+  font-size: medium;
+  font-weight: normal;
+}
+
+.folderTask {
+  border: 1px solid var(--middle);
+  border-radius: 10px;
+  width: 90%;
+  display: inline-block;
+
+  margin-left: 5%;
+  margin-right: 5%;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.taskTitle {
+  text-align: center;
+}
+
+.taskProgress {
+  width: 90%;
+  margin: 10px 5% 10px 5%;
+}
+
+.taskProgress::-webkit-meter-optimum-value {
+  background: var(--middle);
+}
+
+.folderStatus,
 .folderDate,
-.fileDate {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  margin: 10px;
+.folderResponsable {
+  margin-left: 5%;
 }
 
-.fileSize {
+.folderButton {
+  /* float: right; */
+  position: absolute;
+  right: 20px;
+  bottom: 0;
 }
+
+#avancee {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding: 10px;
+  border: var(--middle) solid 1px;
+  border-radius: 10px;
+  background-color: white;
+}
+
+#tasks {
+  /* display: block; */
+  text-align: justify;
+  /* width: 90%;
+  margin-left: 5%;
+  margin-right: 5%;
+  height: 40px; */
+}
+
+#tasks:after {
+  display: inline-block;
+  width: 90%;
+  content: "";
+  /* vertical-align: top; */
+}
+
+.task {
+  /* position: relative; */
+  display: inline-block;
+  border: solid 1px var(--middle);
+  border-radius: 10px;
+  padding: 5px;
+  /* transform: translateX(-50%); */
+  vertical-align: middle;
+}
+
+.task.complete {
+  background-color: var(--middle);
+  color: var(--light);
+}
+
+/* Files */
+
+.buttons {
+  text-align: center;
+  justify-content: space-around;
+  width: 90%;
+  margin-left: 5%;
+  margin-right: 5%;
+}
+
+.buttons button {
+  margin-top: 10px;
+  width: 200 px;
+}
+
+/* Contacts */
 
 /* Profile */
 
 .userPicture {
   width: 50px;
   height: 50px;
+}
+
+ul {
+  text-align: justify;
+  width: 95%;
+}
+ul:after {
+  display: inline-block;
+  width: 95%;
+  content: "";
+}
+ul li {
+  display: inline-block;
 }
