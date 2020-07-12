@@ -58,7 +58,7 @@ ui.start("#firebaseui-auth-container", uiConfig);
 // Listeners
 
 // $("#submitWorkspaceButton").click(() => {
-//   var workspaceRef = database.collection("organisation").doc();
+//   var workspaceRef = database.collection("workspace").doc();
 //   workspaceRef
 //     .set({
 //       clients: [],

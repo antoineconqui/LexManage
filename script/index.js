@@ -42,9 +42,9 @@ firebase.auth().onAuthStateChanged(function (user) {
 });
 
 function getAdminDatas() {
-  userData.organisation.get().then(function (doc) {
-    var organisation = doc.data();
-    kits = organisation.kits;
+  userData.workspace.get().then(function (doc) {
+    var workspace = doc.data();
+    kits = workspace.kits;
     for (let i = 0; i < kits.length; i++) {
       const kit = kits[i];
       kit.get().then(function (doc) {
@@ -55,14 +55,14 @@ function getAdminDatas() {
         $("#inputKit").append($('<option value="' + i + '">' + doc.data().title + "</option>"));
       });
     }
-    clients = organisation.clients;
+    clients = workspace.clients;
     for (let i = 0; i < clients.length; i++) {
       const client = clients[i];
       client.get().then(function (doc) {
         $("#inputClient").append($('<option value="' + i + '">' + doc.data().name + "</option>"));
       });
     }
-    members = organisation.members;
+    members = workspace.members;
     for (let i = 0; i < members.length; i++) {
       const member = members[i];
       member.get().then(function (doc) {

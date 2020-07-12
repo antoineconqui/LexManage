@@ -8,7 +8,6 @@ firebase.auth().onAuthStateChanged(() => {
 
 function displayContact(contact) {
   var contactWidget = $("<div class='contact container'/>");
-
   var contactPicture = $('<img class="profilePicture" src="' + contact.profilePicture + '"/>');
   var contactName = $("<div class='contactName'>" + contact.name + "</div>");
   var contactEmail = $("<div class='contactEmail'>" + contact.email + "</div>");
@@ -29,7 +28,7 @@ function displayContact(contact) {
 
 function updateContacts() {
   $("#contactsDisplayer").empty();
-  userData.organisation.get().then((doc) => {
+  userData.workspace.get().then((doc) => {
     doc.data().contacts.forEach((user) => {
       user.get().then((doc) => {
         var contact = doc.data();

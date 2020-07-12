@@ -71,7 +71,7 @@ function updateFolders() {
   $("#foldersDisplayer").empty();
   database
     .collection("folders")
-    .where("client", "==", userData.organisation)
+    .where("client", "==", userData.workspace)
     .orderBy("creationDate", "desc")
     .get()
     .then(function (querySnapshot) {

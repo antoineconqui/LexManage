@@ -9,7 +9,7 @@ function valid(email) {
 }
 
 function createNewClient() {
-  var workspaceRef = database.collection("organisation").doc();
+  var workspaceRef = database.collection("workspace").doc();
   var userRef = database.collection("users").doc();
 
   workspaceRef
@@ -17,7 +17,7 @@ function createNewClient() {
       admin: userRef,
       contacts: [],
       members: [userRef],
-      name: $("#organisationNameInput").val(),
+      name: $("#workspaceNameInput").val(),
     })
     .then(() => {
       userRef
@@ -26,14 +26,14 @@ function createNewClient() {
           date: new Date(),
           email: $("#clientEmailInput").val(),
           name: $("#clientNameInput").val(),
-          organisation: workspaceRef,
+          workspace: workspaceRef,
         })
         .then(() => {
-          userData.organisation.get().then((doc) => {
+          userData.workspace.get().then((doc) => {
             var clients = doc.data().clients;
             // clients.push(userRef);
             clients.push(workspaceRef);
-            userData.organisation
+            userData.workspace
               .update({
                 clients: clients,
               })
@@ -49,7 +49,7 @@ function createNewClient() {
 }
 
 function updateAdminContacts() {
-  userData.organisation.get().then(function (doc) {
+  userData.workspace.get().then(function (doc) {
     doc.data().clients.forEach((client) => {
       client.get().then((doc) => {
         doc.data().members.forEach((member) => {
