@@ -51,6 +51,10 @@ h2 {
   background-color: var(--middle);
 }
 
+.auth-card ul {
+  text-align: center;
+}
+
 #creation h1 {
   margin-top: 20px;
 }
@@ -203,8 +207,15 @@ li > img {
   margin-left: 10%;
 }
 
+#alertEmail {
+  width: 80%;
+  margin-left: 10%;
+  color: red;
+}
+
 .folder,
-.file {
+.file,
+.contact {
   padding-top: 15px;
   padding-bottom: 15px;
   margin: 5px;

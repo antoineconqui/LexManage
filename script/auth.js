@@ -7,29 +7,31 @@ var ui = new firebaseui.auth.AuthUI(firebase.auth());
 var uiConfig = {
   callbacks: {
     signInSuccessWithAuthResult: function (authResult, redirectUrl) {
-      if (authResult.additionalUserInfo.isNewUser) {
-        var docRef = database.collection("users").doc();
-        docRef
-          .set({
-            date: new Date(),
-            name: authResult.user.displayName,
-            email: authResult.user.email,
-            profilePicture: authResult.user.photoURL,
-            contacts: [],
-            admin: false,
-          })
-          .then(() => {
-            console.log(redirectUrl);
-            window.location.replace("./index.html");
-          });
-      } else {
-        window.location.replace("./index.html");
-      }
+      console.log(authResult);
+      database
+        .collection("users")
+        .where("email", "==", authResult.user.email)
+        .get()
+        .then(function (querySnapshot) {
+          if (querySnapshot.empty) {
+            console.log("Vous n'êtes pas encore client, veuillez contacter un membre du service client de lexStart");
+          } else {
+            querySnapshot.forEach((doc) => {
+              doc.ref
+                .update({
+                  name: authResult.user.displayName,
+                  profilePicture: authResult.user.photoURL,
+                })
+                .then(() => {
+                  window.location.replace("./index.html");
+                });
+            });
+          }
+        });
     },
   },
   credentialHelper: firebaseui.auth.CredentialHelper.NONE,
   signInFlow: "popup",
-  // signInSuccessUrl: "./index.html",
   signInOptions: [
     {
       provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
@@ -55,6 +57,16 @@ ui.start("#firebaseui-auth-container", uiConfig);
 
 // Listeners
 
-$("#submitWorkspaceButton").click(() => {
-  workspace = $("#workspaceNameInput").val();
-});
+// $("#submitWorkspaceButton").click(() => {
+//   var workspaceRef = database.collection("organisation").doc();
+//   workspaceRef
+//     .set({
+//       clients: [],
+//       kits: [],
+//       members: [],
+//       name: $("#workspaceNameInput").val(),
+//     })
+//     .then(() => {
+//       window.location.replace("./auth.html");
+//     });
+// });

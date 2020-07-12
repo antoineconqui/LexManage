@@ -1,51 +1,19 @@
-<div id="folders">
-  <div class="row">
-    <div class="col-4 offset-md-4 center">
-      <h1>Mes contacts</h1>
-    </div>
-    <div class="col-4 center">
-      <button class="validButton" id="newContactButton" data-toggle="modal" data-target="#newContactModal">
-        Nouveau Contact
-      </button>
-    </div>
-  </div>
-  <div class="row" id="contactsDisplayer"></div>
+<div id="contacts">
+  <h1>Mes contacts</h1>
+  <div id="contactsDisplayer" />
 </div>
 
-<div id="newContactModal" class="modal fade">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h4 class="modal-title">Ajouter un nouveau contact</h4>
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="col-md-6">
-          <h5>Utilisateur existant</h5>
-          <div id="collaboratorsDropdown" class="dropdown-content">
-            <input type="text" placeholder="Rechercher" id="collaboratorsInput" onkeyup="uploadList()" />
-            <a href="#about">About</a>
-            <a href="#base">Base</a>
-            <a href="#blog">Blog</a>
-            <a href="#contact">Contact</a>
-            <a href="#custom">Custom</a>
-            <a href="#support">Support</a>
-            <a href="#tools">Tools</a>
-          </div>
-          <div id="collaboratorsDisplayer"></div>
-        </div>
-        <div class="col-md-6">
-          <h5>Inviter un nouvel utilisateur</h5>
-          <button type="button" class="btn validButton" id="inviteContactButton">Inviter</button>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn cancelButton" data-dismiss="modal">Annuler</button>
-        <button type="button" class="btn validButton" id="submitContactButton">Créer</button>
-      </div>
+<!-- <div id="contact" style="display: none;">
+  <div class="row">
+    <div class="col-2 center">
+      <button class="cancelButton hvr-underline-from-center" id="backButton">Back</button>
+    </div>
+    <div class="col-6 offset-md-1 center">
+      <h1 id="contactName" />
     </div>
   </div>
-</div>
+  <div id="infos"></div>
+</div> -->
 
 <script>
   $.getScript("./script/contacts.js");

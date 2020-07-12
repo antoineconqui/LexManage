@@ -1,10 +1,5 @@
 // Init
 
-var userFiles = [];
-var filesInput = [];
-
-var selectedFolder = null;
-
 firebase.auth().onAuthStateChanged(() => {
   updateFolders();
 });
@@ -76,7 +71,7 @@ function updateFolders() {
   $("#foldersDisplayer").empty();
   database
     .collection("folders")
-    .where("owner", "==", userRef)
+    .where("client", "==", userData.organisation)
     .orderBy("creationDate", "desc")
     .get()
     .then(function (querySnapshot) {
@@ -170,6 +165,7 @@ function updateDocuments(folder) {
   $("#documents").empty();
   for (let d = 0; d < folder.documents.length; d++) {
     const document = folder.documents[d];
+    console.log(document);
     var documentWidget = $('<div class="document"><h4>' + document.title + "</h4></div>");
     for (let f = 0; f < document.files.length; f++) {
       documentWidget.append(displayFile(document.files[f], folder, d, f));
@@ -249,10 +245,4 @@ function displayInput(input, folder, d, f) {
 $("#backButton").click(() => {
   $("#folders").show();
   $("#folder").hide();
-});
-
-$("#fileInput").change((event) => {});
-
-$("#filesSubmitButton").click(() => {
-  for (let i = 0; i < filesInput.length; i++);
 });

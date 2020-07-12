@@ -1,47 +1,12 @@
 // Init
 
-var documents = {};
-
-var kits;
-var clients;
-var members;
-
-userData.organisation.get().then(function (doc) {
-  var organisation = doc.data();
-  kits = organisation.kits;
-  for (let i = 0; i < kits.length; i++) {
-    const kit = kits[i];
-    kit.get().then(function (doc) {
-      documents[i] = {
-        title: doc.data().title,
-        documents: doc.data().documents,
-      };
-      $("#inputKit").append($('<option value="' + i + '">' + doc.data().title + "</option>"));
-    });
-  }
-  clients = organisation.clients;
-  for (let i = 0; i < clients.length; i++) {
-    const client = clients[i];
-    client.get().then(function (doc) {
-      $("#inputClient").append($('<option value="' + i + '">' + doc.data().name + "</option>"));
-    });
-  }
-  members = organisation.members;
-  for (let i = 0; i < members.length; i++) {
-    const member = members[i];
-    member.get().then(function (doc) {
-      $("#inputResponsable").append($('<option value="' + i + '">' + doc.data().name + "</option>"));
-    });
-  }
-});
-
 updateAdminFolders();
 
 // General Functions
 
 function createNewFolder() {
-  var docRef = database.collection("folders").doc();
-  docRef
+  var folderRef = database.collection("folders").doc();
+  folderRef
     .set({
       client: clients[$("#inputClient").val()],
       complete: false,
@@ -54,6 +19,13 @@ function createNewFolder() {
       title: documents[$("#inputKit").val()].title,
     })
     .then(() => {
+      clients[$("#inputClient").val()].get().then((doc) => {
+        var contacts = doc.data().contacts;
+        contacts.push(members[$("#inputResponsable").val()]);
+        clients[$("#inputClient").val()].update({
+          contacts: contacts,
+        });
+      });
       updateFolders();
       updateAdminFolders();
     });
@@ -63,6 +35,7 @@ function updateAdminFolders() {
   database
     .collection("folders")
     .where("responsable", "==", userRef)
+    // .where("responsables", "array-contains", userRef)
     .orderBy("creationDate", "desc")
     .get()
     .then(function (querySnapshot) {
@@ -76,14 +49,6 @@ function updateAdminFolders() {
 }
 
 // Listeners
-
-$("#newFolderButton").click(() => {
-  $("#newFolderModal").show();
-});
-
-$("#cancelFolderButton").click(() => {
-  $("#newFolderModal").hide();
-});
 
 $("#folderSubmitButton").click(() => {
   createNewFolder();

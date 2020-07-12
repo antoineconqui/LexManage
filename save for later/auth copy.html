@@ -21,11 +21,44 @@
       </div>
       <div class="row" id="main">
         <div class="auth-card my-auto" id="connexion">
-          <h1>Connexion</h1>
+          <h1>Authentification</h1>
           <div class="container" id="firebaseui-auth-container"></div>
         </div>
+
+        <!-- <div class="auth-card my-auto" id="creation">
+          <h1>Créer un espace de travail</h1>
+          <button class="validButton" id="newWorkspaceButton" data-toggle="modal" data-target="#newWorkspaceModal">
+            Créer
+          </button>
+        </div> -->
       </div>
     </div>
+
+    <!-- <div id="newWorkspaceModal" class="modal fade">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Nouvel espace de travail</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+          <div class="modal-body">
+            <h5>Comment s'appelle votre organisation ?</h5>
+            <br />
+            <input type="text" id="workspaceNameInput" />
+            <br />
+            <h5>Inviter des collaborateurs</h5>
+            <br />
+            <input type="text" id="emailInvitationInput" />
+            <br />
+            <div id="collaboratorsDisplayer"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn cancelButton" data-dismiss="modal">Annuler</button>
+            <button type="button" class="btn validButton" id="submitWorkspaceButton">Créer</button>
+          </div>
+        </div>
+      </div>
+    </div> -->
 
     <div>
       <script src="https://www.gstatic.com/firebasejs/7.14.5/firebase-app.js"></script>

@@ -1,40 +1,42 @@
 // Init
 
-// var contacts = [];
-
 firebase.auth().onAuthStateChanged(() => {
   updateContacts();
 });
 
 // Contacts
 
-function addContact() {}
+function displayContact(contact) {
+  var contactWidget = $("<div class='contact container'/>");
 
-function displayContact(i, contactObject) {
-  console.log(contactObject);
+  var contactPicture = $('<img class="profilePicture" src="' + contact.profilePicture + '"/>');
+  var contactName = $("<div class='contactName'>" + contact.name + "</div>");
+  var contactEmail = $("<div class='contactEmail'>" + contact.email + "</div>");
+  var contactDate = $("<div class='contactDate'>" + new Date(contact.date.seconds * 1000).toLocaleDateString() + "</div>");
+
+  var contactButton = $("<button class='contactButton validButton'>Ouvrir</div>");
+
+  contactWidget.append(contactPicture, contactName, contactEmail, contactDate, contactButton);
+
+  // contactButton.click(() => {
+  //   openFolder(contact);
+  //   $("#contacts").hide();
+  //   $("#contact").show();
+  // });
+
+  $("#contactsDisplayer").append(contactWidget);
 }
 
 function updateContacts() {
   $("#contactsDisplayer").empty();
-  var contacts = [];
-  database
-    .collection("users")
-    .where("email", "==", firebase.auth().currentUser.email)
-    .get()
-    .then(function (querySnapshot) {
-      querySnapshot.forEach((postDoc) => {
-        postDoc.data().contacts.forEach((contact) => {
-          contacts.push({
-            id: postDoc.id,
-            name: postDoc.data().name,
-            email: postDoc.data().email,
-            profilePicture: postDoc.data().profilePicture,
-          });
-        });
+  userData.organisation.get().then((doc) => {
+    doc.data().contacts.forEach((user) => {
+      user.get().then((doc) => {
+        var contact = doc.data();
+        contact.id = doc.id;
+        contact.ref = doc.ref;
+        displayContact(contact);
       });
-    })
-    .then(() => {
-      // console.log(contacts);
-      for (let i = 0; i < contacts.length; i++) displayContact(i, contacts[i]);
     });
+  });
 }

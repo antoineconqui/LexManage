@@ -3,10 +3,16 @@
 var userData;
 var userRef;
 
+var documents = {};
+
+var kits;
+var clients;
+var members;
+
 $(document).ready(() => {
   unSelect();
-  $("#foldersButton").addClass("selected");
-  $("#foldersPage").show();
+  $("#contactsButton").addClass("selected");
+  $("#contactsPage").show();
 });
 
 firebase.auth().onAuthStateChanged(function (user) {
@@ -20,18 +26,51 @@ firebase.auth().onAuthStateChanged(function (user) {
         userData = doc.data();
         userRef = doc.ref;
         if (userData.admin) {
+          getAdminDatas();
+          $("#contactsPage").load("./contacts-admin.html");
           $("#foldersPage").load("./folders-admin.html");
         } else {
+          $("#contactsPage").load("./contacts.html");
           $("#foldersPage").load("./folders.html");
         }
       });
     });
   $("#homePage").load("./home.html");
-  //la page folder change selon user admin
-  $("#contactsPage").load("./contacts.html");
   $("#workspacePage").load("./workspace.html");
   $("#profilePage").load("./profile.html");
+  //les pages folders et contacts changent selon user admin
 });
+
+function getAdminDatas() {
+  userData.organisation.get().then(function (doc) {
+    var organisation = doc.data();
+    kits = organisation.kits;
+    for (let i = 0; i < kits.length; i++) {
+      const kit = kits[i];
+      kit.get().then(function (doc) {
+        documents[i] = {
+          title: doc.data().title,
+          documents: doc.data().documents,
+        };
+        $("#inputKit").append($('<option value="' + i + '">' + doc.data().title + "</option>"));
+      });
+    }
+    clients = organisation.clients;
+    for (let i = 0; i < clients.length; i++) {
+      const client = clients[i];
+      client.get().then(function (doc) {
+        $("#inputClient").append($('<option value="' + i + '">' + doc.data().name + "</option>"));
+      });
+    }
+    members = organisation.members;
+    for (let i = 0; i < members.length; i++) {
+      const member = members[i];
+      member.get().then(function (doc) {
+        $("#inputResponsable").append($('<option value="' + i + '">' + doc.data().name + "</option>"));
+      });
+    }
+  });
+}
 
 // Menu
 
