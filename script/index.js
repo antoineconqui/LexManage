@@ -3,16 +3,16 @@
 var userData;
 var userRef;
 
-var documents = {};
-
-var kits;
-var clients;
-var members;
+var admin;
+var kitsRef;
+var kitsDatas = {};
+var clientsRef;
+var membersRef;
 
 $(document).ready(() => {
   unSelect();
-  $("#contactsButton").addClass("selected");
-  $("#contactsPage").show();
+  $("#foldersButton").addClass("selected");
+  $("#foldersPage").show();
 });
 
 firebase.auth().onAuthStateChanged(function (user) {
@@ -26,9 +26,13 @@ firebase.auth().onAuthStateChanged(function (user) {
         userData = doc.data();
         userRef = doc.ref;
         if (userData.admin) {
-          getAdminDatas();
-          $("#contactsPage").load("./contacts-admin.html");
-          $("#foldersPage").load("./folders-admin.html");
+          if (!getCookie("token")) {
+            window.location.replace("./token.php");
+          } else {
+            getAdminDatas();
+            $("#contactsPage").load("./contacts-admin.html");
+            $("#foldersPage").load("./folders-admin.html");
+          }
         } else {
           $("#contactsPage").load("./contacts.html");
           $("#foldersPage").load("./folders.html");
@@ -41,30 +45,46 @@ firebase.auth().onAuthStateChanged(function (user) {
   //les pages folders et contacts changent selon user admin
 });
 
+function getCookie(key) {
+  var key = key + "=";
+  var decodedCookie = decodeURIComponent(document.cookie);
+  var cookies = decodedCookie.split(";");
+  for (var i = 0; i < cookies.length; i++) {
+    var cookie = cookies[i];
+    while (cookie.charAt(0) == " ") {
+      cookie = cookie.substring(1);
+    }
+    if (cookie.indexOf(key) == 0) {
+      return cookie.substring(key.length, cookie.length);
+    }
+  }
+  return false;
+}
+
 function getAdminDatas() {
   userData.workspace.get().then(function (doc) {
     var workspace = doc.data();
-    kits = workspace.kits;
-    for (let i = 0; i < kits.length; i++) {
-      const kit = kits[i];
+    kitsRef = workspace.kits;
+    for (let i = 0; i < kitsRef.length; i++) {
+      const kit = kitsRef[i];
       kit.get().then(function (doc) {
-        documents[i] = {
+        kitsDatas[i] = {
           title: doc.data().title,
-          documents: doc.data().documents,
+          files: doc.data().files,
         };
         $("#inputKit").append($('<option value="' + i + '">' + doc.data().title + "</option>"));
       });
     }
-    clients = workspace.clients;
-    for (let i = 0; i < clients.length; i++) {
-      const client = clients[i];
+    clientsRef = workspace.clients;
+    for (let i = 0; i < clientsRef.length; i++) {
+      const client = clientsRef[i];
       client.get().then(function (doc) {
         $("#inputClient").append($('<option value="' + i + '">' + doc.data().name + "</option>"));
       });
     }
-    members = workspace.members;
-    for (let i = 0; i < members.length; i++) {
-      const member = members[i];
+    membersRef = workspace.members;
+    for (let i = 0; i < membersRef.length; i++) {
+      const member = membersRef[i];
       member.get().then(function (doc) {
         $("#inputResponsable").append($('<option value="' + i + '">' + doc.data().name + "</option>"));
       });

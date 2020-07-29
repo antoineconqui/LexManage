@@ -4,53 +4,66 @@ firebase.auth().onAuthStateChanged(() => {
   updateFolders();
 });
 
+window.addEventListener("message", (message) => {
+  console.log(message);
+});
+
 // General Functions
 
-function createFile(folder, documentN, fileN, fileObject) {
-  var docRef = database.collection("files").doc();
+function createFile(folder, fileName, fileBlob, clientEdition) {
+  console.log(fileBlob);
+  var fileRef = storage.child(folder.id + "/" + fileName + "/" + fileName + " (0).docx");
 
-  var fileRef = storage.child(docRef.id);
+  var uploadTask = fileRef.put(fileBlob);
 
-  var uploadTask = fileRef.put(fileObject);
-
-  uploadTask.on(
-    firebase.storage.TaskEvent.STATE_CHANGED,
-    function (snapshot) {
-      $("#inputProgress").attr("value", (snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-    },
-    function (error) {
-      console.log(error);
-    },
-    function () {
-      $("#inputProgress").hide();
-      $("#inputCheck").show();
-    }
-  );
+  // displayProgress(uploadTask);
 
   uploadTask.then((snapshot) => {
     snapshot.ref.getDownloadURL().then((url) => {
-      docRef.set({
-        comments: "",
-        date: new Date(),
-        link: url,
-        owner: folder.owner,
-        size: fileObject.size,
-        version: folder.documents[documentN].files[fileN].versions.length + 1,
-      });
-      var documents;
+      var files;
       folder.ref.get().then((doc) => {
-        documents = doc.data().documents;
-        documents[documentN].files[fileN].versions.push(docRef);
+        files = doc.data().files;
+        files.push({
+          versions: [{ url: url }],
+          title: fileName,
+          client_edition: clientEdition,
+        });
         folder.ref.update({
-          documents: documents,
+          files: files,
+        });
+        updateFiles(folder);
+      });
+    });
+  });
+}
+
+function updateFile(folder, f, fileBlob) {
+  var version;
+  var fileName;
+
+  folder.ref.get().then((doc) => {
+    var datas = doc.data();
+    version = datas.files[f].versions.length;
+    fileName = datas.files[f].title;
+  });
+
+  var fileRef = storage.child(folder.id + "/" + fileName + "/" + fileName + " (" + version + ").docx");
+
+  var uploadTask = fileRef.put(fileBlob);
+
+  // displayProgress(uploadTask);
+
+  uploadTask.then((snapshot) => {
+    snapshot.ref.getDownloadURL().then((url) => {
+      var files;
+      folder.ref.get().then((doc) => {
+        files = doc.data().files;
+        files[f].versions.push({ url: url });
+        folder.ref.update({
+          files: files,
         });
       });
-      folder.ref.get().then((doc) => {
-        var folder = doc.data();
-        folder.id = doc.id;
-        folder.ref = doc.ref;
-        updateDocuments(folder);
-      });
+      updateFiles(folder);
     });
   });
 }
@@ -65,7 +78,50 @@ function sizeDisplayer(size) {
   return Math.round(size * 100) / 100 + " " + units[i];
 }
 
-// Folders
+function openFolder(folder) {
+  $("#folderTitle").html(folder.title);
+  updateStatus(folder);
+  updateFiles(folder);
+}
+
+function getDocuments(folder, f, questionnaire) {
+  $.post(
+    "./requests/documents.php",
+    {
+      id: questionnaire.id,
+      token: getCookie("token"),
+    },
+    (response) => {
+      JSON.parse(response).documents.forEach((document) => {
+        console.log(document);
+        var xhr = new XMLHttpRequest();
+        xhr.responseType = "blob";
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState == 4 && xhr.status == 200) {
+            console.log(xhr.response);
+            createFile(folder, document.name, xhr.response, false);
+            var files;
+            folder.ref.get().then((doc) => {
+              files = doc.data().files;
+              files[f].collected = true;
+              folder.ref.update({
+                files: files,
+              });
+            });
+          }
+        };
+        xhr.open("POST", "./requests/content.php");
+        var datas = new FormData();
+        datas.append("id", questionnaire.id);
+        datas.append("document", document.documentId);
+        datas.append("token", getCookie("token"));
+        xhr.send(datas);
+      });
+    }
+  );
+}
+
+// Update
 
 function updateFolders() {
   $("#foldersDisplayer").empty();
@@ -83,6 +139,54 @@ function updateFolders() {
       });
     });
 }
+
+function updateStatus(folder) {
+  $("#statut").html("<h3>Statut du dossier</h3>");
+  var paiement = $('<div id="paiement"></div>');
+  var paiementTitle = $("<b>Statut du paiement : </b>");
+  var paiementStatus = $("<span>" + folder.paymentStatus + "</span>");
+  paiement.append(paiementTitle, paiementStatus);
+
+  var avancee = $('<div id="avancee"/>');
+  var avanceeTitle = $('<div class="title">Avancée du dossier</div>');
+  var value = 1;
+  for (let i = 0; i < folder.tasks.length; i++) {
+    if (!folder.tasks[i].complete) {
+      value = i / folder.tasks.length;
+      break;
+    }
+  }
+  var tasksProgress = $('<meter class="taskProgress" value="' + value + '"/>');
+
+  var tasks = "<ul>";
+  for (let i = 0; i < folder.tasks.length; i++) {
+    const task = folder.tasks[i];
+    var tasks = tasks + '<li class="task ' + (task.complete ? "complete" : "") + '">' + task.title + "</li> ";
+  }
+  tasks = tasks + '<li class="task ' + (folder.tasks[folder.tasks.length - 1].complete ? "complete" : "") + '">Dossier Complet</li></ul>';
+
+  avancee.append(avanceeTitle, tasksProgress, $(tasks));
+
+  $("#statut").append(paiement, avancee);
+}
+
+function updateFiles(folder) {
+  folder.ref.get().then((doc) => {
+    folder = doc.data();
+    folder.id = doc.id;
+    folder.ref = doc.ref;
+    $("#questionnaires").html("<h3>Questionnaires</h3>");
+    $("#files").html("<h3>Documents</h3>");
+    for (let f = 0; f < folder.files.length; f++) {
+      const file = folder.files[f];
+      if (userData.admin && file.complete && !file.collected) getDocuments(folder, f, file);
+      if (file.questionnaire) $("#questionnaires").append(displayQuestionnaire(folder, f, file));
+      else $("#files").append(displayFile(folder, file));
+    }
+  });
+}
+
+// Display
 
 function displayFolder(folder) {
   folder.responsable.get().then(function (doc) {
@@ -125,56 +229,38 @@ function displayFolder(folder) {
   });
 }
 
-function openFolder(folder) {
-  $("#folderTitle").html(folder.title);
-  updateStatus(folder);
-  updateDocuments(folder);
+function displayQuestionnaire(folder, f, questionnaire) {
+  var questionnaireWidget = $('<div class="questionnaire"><h5>' + questionnaire.title + "</h5></div>");
+  if (userData.admin || questionnaire.complete) {
+    questionnaireWidget.append($("<span style='background-color:" + (questionnaire.complete ? "var(--dark)" : "red") + "'>" + (questionnaire.complete ? "COMPLETE" : "UNCOMPLETE") + "</span>"));
+  } else {
+    var questionnaireButton = $('<button class="validButton" id="questionnaireButton" data-toggle="modal" data-target="#questionnaireModal">Ouvrir</button>');
+    questionnaireButton.click(() => {
+      $("#questionnaireFrame").attr("src", questionnaire.link);
+
+      window.addEventListener("message", (message) => {
+        if (message.data.substr(0, 15) === "request:finish:") {
+          $("#questionnaireModal").modal("toggle");
+
+          questionnaire.complete = true;
+          questionnaire.id = message.data.substr(16);
+          folder.ref.get().then((doc) => {
+            var files = doc.data().files;
+            files[f] = questionnaire;
+            folder.ref.update({
+              files: files,
+            });
+          });
+          sendMails(folder);
+        }
+      });
+    });
+    questionnaireWidget.append(questionnaireButton);
+  }
+  return questionnaireWidget;
 }
 
-function updateStatus(folder) {
-  $("#statut").html("<h3>Statut du dossier</h3>");
-  var paiement = $('<div id="paiement"></div>');
-  var paiementTitle = $("<b>Statut du paiement : </b>");
-  var paiementStatus = $("<span>" + folder.paymentStatus + "</span>");
-  paiement.append(paiementTitle, paiementStatus);
-
-  var avancee = $('<div id="avancee"/>');
-  var avanceeTitle = $('<div class="title">Avancée du dossier</div>');
-  var value = 1;
-  for (let i = 0; i < folder.tasks.length; i++) {
-    if (!folder.tasks[i].complete) {
-      value = i / folder.tasks.length;
-      break;
-    }
-  }
-  var tasksProgress = $('<meter class="taskProgress" value="' + value + '"/>');
-
-  var tasks = "<ul>";
-  for (let i = 0; i < folder.tasks.length; i++) {
-    const task = folder.tasks[i];
-    var tasks = tasks + '<li class="task ' + (task.complete ? "complete" : "") + '">' + task.title + "</li> ";
-  }
-  tasks = tasks + '<li class="task ' + (folder.tasks[folder.tasks.length - 1].complete ? "complete" : "") + '">Dossier Complet</li></ul>';
-
-  avancee.append(avanceeTitle, tasksProgress, $(tasks));
-
-  $("#statut").append(paiement, avancee);
-}
-
-function updateDocuments(folder) {
-  $("#documents").empty();
-  for (let d = 0; d < folder.documents.length; d++) {
-    const document = folder.documents[d];
-    console.log(document);
-    var documentWidget = $('<div class="document"><h4>' + document.title + "</h4></div>");
-    for (let f = 0; f < document.files.length; f++) {
-      documentWidget.append(displayFile(document.files[f], folder, d, f));
-    }
-    $("#documents").append(documentWidget);
-  }
-}
-
-function displayFile(file, folder, d, f) {
+function displayFile(folder, file) {
   var fileWidget = $('<div class="file col-6"></div>');
   var fileName = $("<div class='title'>" + file.title + " </div>");
   if (file.versions.length > 0) {
@@ -198,7 +284,7 @@ function displayFile(file, folder, d, f) {
           visible: false,
         })
         .then(() => {
-          updateDocuments();
+          updateFiles();
         });
     }
   });
@@ -209,7 +295,7 @@ function displayFile(file, folder, d, f) {
     uploadInput.change(() => {
       filesInput = event.target.files;
       if (filesInput.length > 0) {
-        fileUploader.html(displayInput(filesInput[0], folder, d, f));
+        fileUploader.html(displayInput(folder, filesInput[0]));
         uploadButton.hide();
         fileButtons.hide();
       }
@@ -225,19 +311,37 @@ function displayFile(file, folder, d, f) {
   return fileWidget;
 }
 
-function displayInput(input, folder, d, f) {
+function displayInput(folder, input) {
+  console.log(input);
   var inputWidget = $("<div></div>");
   var inputName = $("<p>" + input.name + "</p>");
   var inputSize = $("<p>" + sizeDisplayer(input.size) + "</p>");
   var inputProgress = $("<progress id='inputProgress' max='100' value='0'/>");
   var inputCheck = $("<p id='inputCheck' style='display: none;'>✓</p>");
   var inputSubmitButton = $('<button class="validButton">Valider</button>');
+  var fileBlob = new Blob(input);
   inputSubmitButton.click(() => {
     $("#fileUploader").empty();
-    createFile(folder, d, f, input);
+    createFile(folder, input.name, fileBlob, false);
   });
   inputWidget.append(inputName, inputSize, inputProgress, inputCheck, inputSubmitButton);
   return inputWidget;
+}
+
+function displayProgress(uploadTask) {
+  uploadTask.on(
+    firebase.storage.TaskEvent.STATE_CHANGED,
+    function (snapshot) {
+      $("#inputProgress").attr("value", (snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+    },
+    function (error) {
+      console.log(error);
+    },
+    function () {
+      $("#inputProgress").hide();
+      $("#inputCheck").show();
+    }
+  );
 }
 
 // Listeners

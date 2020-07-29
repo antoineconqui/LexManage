@@ -12,8 +12,25 @@
       <h1 id="folderTitle" />
     </div>
   </div>
+  <div id="questionnaires"></div>
   <div id="statut"></div>
-  <div id="documents"></div>
+  <div id="files"></div>
+</div>
+
+<div id="questionnaireModal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Veuillez compléter ce questionnaire</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="parentFrame">
+          <iframe id="questionnaireFrame" src=""> </iframe>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>

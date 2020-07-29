@@ -8,21 +8,21 @@ function createNewFolder() {
   var folderRef = database.collection("folders").doc();
   folderRef
     .set({
-      client: clients[$("#inputClient").val()],
+      client: clientsRef[$("#inputClient").val()],
       complete: false,
       creationDate: new Date($("#inputDate").val()),
-      documents: documents[$("#inputKit").val()].documents,
-      kit: kits[$("#inputKit").val()],
+      files: kitsDatas[$("#inputKit").val()].files,
+      kit: kitsRef[$("#inputKit").val()],
       paymentStatus: $("#inputStatus").val(),
-      responsable: members[$("#inputResponsable").val()],
+      responsable: membersRef[$("#inputResponsable").val()],
       tasks: [{ title: "Commande effectuée", complete: false }],
-      title: documents[$("#inputKit").val()].title,
+      title: kitsDatas[$("#inputKit").val()].title,
     })
     .then(() => {
-      clients[$("#inputClient").val()].get().then((doc) => {
+      clientsRef[$("#inputClient").val()].get().then((doc) => {
         var contacts = doc.data().contacts;
-        contacts.push(members[$("#inputResponsable").val()]);
-        clients[$("#inputClient").val()].update({
+        contacts.push(membersRef[$("#inputResponsable").val()]);
+        clientsRef[$("#inputClient").val()].update({
           contacts: contacts,
         });
       });
