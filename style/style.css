@@ -8,6 +8,13 @@ body {
   background-color: var(--light);
   color: var(--middle);
   font-family: "Raleway";
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  padding-right: 0 !important;
+}
+
+body::-webkit-scrollbar {
+  display: none;
 }
 
 /* Header */
@@ -44,7 +51,6 @@ h2 {
   border: var(--middle) 1px solid;
   border-radius: 10px;
   text-align: center;
-  height: 260px;
   width: 400px;
   padding: 20px;
   color: white;
@@ -145,7 +151,6 @@ li > img {
   padding-top: 10px;
   padding-bottom: 10px;
   height: 100%;
-  overflow: auto;
 }
 
 /* Sidebar
@@ -202,7 +207,8 @@ li > img {
 }
 
 .modal input,
-.modal select {
+.modal select,
+.modal textarea {
   width: 80%;
   margin-left: 10%;
 }
@@ -217,7 +223,8 @@ li > img {
 
 .folder,
 .file,
-.contact {
+.client,
+.kit {
   padding-top: 15px;
   padding-bottom: 15px;
   margin: 5px;
@@ -289,6 +296,10 @@ li > img {
 
 /* Modal */
 
+#questionnaireModal .modal-dialog {
+  max-width: none;
+}
+
 #questionnaireModal .modal-content {
   /* width: 1056px; */
   height: 100%;
@@ -338,8 +349,8 @@ li > img {
   margin-left: 5%;
 }
 
-.folderButton {
-  /* float: right; */
+.folderButton,
+.clientButton {
   position: absolute;
   right: 20px;
   bottom: 0;
@@ -400,7 +411,59 @@ li > img {
   width: 200 px;
 }
 
-/* Contacts */
+/* Clients */
+
+/* Kits */
+
+.flags {
+  justify-content: space-evenly;
+  align-items: center;
+  display: flex;
+}
+
+.flags div {
+  display: inline-block;
+}
+
+.flags img {
+  width: 40px;
+  height: 20px;
+}
+
+.kitFiles {
+  width: 100%;
+  padding-left: 10%;
+  padding-right: 10%;
+  margin-bottom: 3rem;
+}
+
+.kitFile {
+  display: list-item;
+  margin-top: 10px;
+}
+
+.kitFile b {
+  font-size: medium;
+}
+
+.kitFile div {
+  overflow: hidden;
+}
+
+.kitFile input,
+.kitFile textarea {
+  width: 100%;
+}
+
+.kitButton {
+  position: absolute;
+  right: 20px;
+  top: 0;
+}
+
+.addButton {
+  margin: auto;
+}
 
 /* Profile */
 

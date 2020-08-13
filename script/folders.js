@@ -1,5 +1,7 @@
 // Init
 
+var currentFolder;
+
 firebase.auth().onAuthStateChanged(() => {
   updateFolders();
 });
@@ -10,8 +12,7 @@ window.addEventListener("message", (message) => {
 
 // General Functions
 
-function createFile(folder, fileName, fileBlob, clientEdition) {
-  console.log(fileBlob);
+function createFile(folder, fileName, fileBlob) {
   var fileRef = storage.child(folder.id + "/" + fileName + "/" + fileName + " (0).docx");
 
   var uploadTask = fileRef.put(fileBlob);
@@ -23,15 +24,21 @@ function createFile(folder, fileName, fileBlob, clientEdition) {
       var files;
       folder.ref.get().then((doc) => {
         files = doc.data().files;
-        files.push({
-          versions: [{ url: url }],
-          title: fileName,
-          client_edition: clientEdition,
-        });
-        folder.ref.update({
-          files: files,
-        });
-        updateFiles(folder);
+        doc
+          .data()
+          .client.get()
+          .then((doc) => {
+            files.push({
+              versions: [{ url: url, visible: doc.data().sub }],
+              title: fileName,
+              client_edition: false,
+              questionnaire: false,
+            });
+            folder.ref.update({
+              files: files,
+            });
+            updateFiles(folder);
+          });
       });
     });
   });
@@ -79,6 +86,7 @@ function sizeDisplayer(size) {
 }
 
 function openFolder(folder) {
+  currentFolder = folder;
   $("#folderTitle").html(folder.title);
   updateStatus(folder);
   updateFiles(folder);
@@ -93,13 +101,11 @@ function getDocuments(folder, f, questionnaire) {
     },
     (response) => {
       JSON.parse(response).documents.forEach((document) => {
-        console.log(document);
         var xhr = new XMLHttpRequest();
         xhr.responseType = "blob";
         xhr.onreadystatechange = function () {
           if (xhr.readyState == 4 && xhr.status == 200) {
-            console.log(xhr.response);
-            createFile(folder, document.name, xhr.response, false);
+            createFile(folder, document.name, xhr.response);
             var files;
             folder.ref.get().then((doc) => {
               files = doc.data().files;
@@ -136,19 +142,17 @@ function updateFolders() {
         folder.id = doc.id;
         folder.ref = doc.ref;
         displayFolder(folder);
+        for (let f = 0; f < folder.files.length; f++) {
+          var file = folder.files[f];
+          if (userData.admin && file.questionnaire && file.complete && !file.collected) getDocuments(folder, f, file);
+        }
       });
     });
 }
 
 function updateStatus(folder) {
-  $("#statut").html("<h3>Statut du dossier</h3>");
-  var paiement = $('<div id="paiement"></div>');
-  var paiementTitle = $("<b>Statut du paiement : </b>");
-  var paiementStatus = $("<span>" + folder.paymentStatus + "</span>");
-  paiement.append(paiementTitle, paiementStatus);
-
-  var avancee = $('<div id="avancee"/>');
-  var avanceeTitle = $('<div class="title">Avancée du dossier</div>');
+  $("#statut").html("<h3>Avancée du dossier</h3>");
+  var avanceeTitle = $('<div class="title"></div>');
   var value = 1;
   for (let i = 0; i < folder.tasks.length; i++) {
     if (!folder.tasks[i].complete) {
@@ -165,9 +169,7 @@ function updateStatus(folder) {
   }
   tasks = tasks + '<li class="task ' + (folder.tasks[folder.tasks.length - 1].complete ? "complete" : "") + '">Dossier Complet</li></ul>';
 
-  avancee.append(avanceeTitle, tasksProgress, $(tasks));
-
-  $("#statut").append(paiement, avancee);
+  $("#statut").append(avanceeTitle, tasksProgress, $(tasks));
 }
 
 function updateFiles(folder) {
@@ -179,10 +181,14 @@ function updateFiles(folder) {
     $("#files").html("<h3>Documents</h3>");
     for (let f = 0; f < folder.files.length; f++) {
       const file = folder.files[f];
-      if (userData.admin && file.complete && !file.collected) getDocuments(folder, f, file);
       if (file.questionnaire) $("#questionnaires").append(displayQuestionnaire(folder, f, file));
       else $("#files").append(displayFile(folder, file));
     }
+    $("#questionnaires").show();
+    $("#files").show();
+    console.log($("#questionnaires").find(".questionnaire").length);
+    if ($("#questionnaires").find(".questionnaire").length == 0) $("#questionnaires").hide();
+    if ($("#files").find(".file").length == 0) $("#files").hide();
   });
 }
 
@@ -211,11 +217,11 @@ function displayFolder(folder) {
     leftPanel.append(folderTitle, folderTask);
 
     var rightPanel = $('<div class="col-md-6"/>');
-    var folderStatus = $("<div class='folderStatus'><b>Statut du paiement : </b></br><span>" + folder.paymentStatus + "</span></div>");
+    // var folderStatus = $("<div class='folderStatus'><b>Statut du paiement : </b></br><span>" + folder.paymentStatus + "</span></div>");
     var folderDate = $("<div class='folderDate'><b>Date de Création : </b></br><span>" + new Date(folder.creationDate.seconds * 1000).toLocaleDateString() + "</span></div>");
     var folderResponsable = $("<div class='folderResponsable'><b>Responsable du Dossier :  </b></br><span>" + doc.data().name + "</span></div>");
-    var folderButton = $("<button class='folderButton validButton'>Ouvrir</div>");
-    rightPanel.append(folderStatus, folderDate, folderResponsable, folderButton);
+    var folderButton = $("<button class='folderButton validButton'>Ouvrir</button>");
+    rightPanel.append(folderDate, folderResponsable, folderButton);
 
     folderWidget.append(leftPanel, rightPanel);
 
@@ -230,7 +236,7 @@ function displayFolder(folder) {
 }
 
 function displayQuestionnaire(folder, f, questionnaire) {
-  var questionnaireWidget = $('<div class="questionnaire"><h5>' + questionnaire.title + "</h5></div>");
+  var questionnaireWidget = $('<div class="questionnaire"><h5>Questionnaire - ' + folder.title + "</h5></div>");
   if (userData.admin || questionnaire.complete) {
     questionnaireWidget.append($("<span style='background-color:" + (questionnaire.complete ? "var(--dark)" : "red") + "'>" + (questionnaire.complete ? "COMPLETE" : "UNCOMPLETE") + "</span>"));
   } else {
@@ -238,23 +244,28 @@ function displayQuestionnaire(folder, f, questionnaire) {
     questionnaireButton.click(() => {
       $("#questionnaireFrame").attr("src", questionnaire.link);
 
-      window.addEventListener("message", (message) => {
-        if (message.data.substr(0, 15) === "request:finish:") {
-          $("#questionnaireModal").modal("toggle");
+      // window.addEventListener("message", (message) => {
+      //   if (message.data.substr(0, 15) === "request:finish:") {
+      //     $("#questionnaireModal").modal("toggle");
 
-          questionnaire.complete = true;
-          questionnaire.id = message.data.substr(16);
-          folder.ref.get().then((doc) => {
-            var files = doc.data().files;
-            files[f] = questionnaire;
-            folder.ref.update({
-              files: files,
-            });
-          });
-          sendMails(folder);
-        }
-      });
+      //     questionnaire.complete = true;
+      //     questionnaire.id = message.data.substr(16);
+      //     folder.ref.get().then((doc) => {
+      //       var files = doc.data().files;
+      //       files[f] = questionnaire;
+      //       folder.ref.update({
+      //         files: files,
+      //       });
+      //     });
+      //     sendMails(folder);
+      //   }
+      // });
     });
+    // && questionnaire.complete
+    // console.log(userData.admin, questionnaire.id);
+    if (userData.admin && questionnaire.id === undefined) {
+      questionnaireWidget.append($("<div><input type='text' placeholder='ID Contract Express'></div>"));
+    }
     questionnaireWidget.append(questionnaireButton);
   }
   return questionnaireWidget;
@@ -269,9 +280,12 @@ function displayFile(folder, file) {
   }
   fileWidget.append(fileName);
   var fileButtons = $('<div class="buttons"></div>');
-  if (file.versions.length != 0) {
-    var downloadButton = $("<div><a href='" + file.versions[file.versions.length - 1].link + "' download><button class='validButton' >Download</button></a></div>");
-    fileButtons.append(downloadButton);
+  for (let v = file.versions.length - 1; v >= 0; v--) {
+    if (file.versions[v].visible) {
+      var downloadButton = $("<div><a href='" + file.versions[v].link + "' download><button class='validButton' >Download</button></a></div>");
+      fileButtons.append(downloadButton);
+      break;
+    }
   }
   var shareButton = $("<div><button class='validButton'>Share</button></div>");
   shareButton.click(() => {});
@@ -312,7 +326,6 @@ function displayFile(folder, file) {
 }
 
 function displayInput(folder, input) {
-  console.log(input);
   var inputWidget = $("<div></div>");
   var inputName = $("<p>" + input.name + "</p>");
   var inputSize = $("<p>" + sizeDisplayer(input.size) + "</p>");
@@ -322,7 +335,7 @@ function displayInput(folder, input) {
   var fileBlob = new Blob(input);
   inputSubmitButton.click(() => {
     $("#fileUploader").empty();
-    createFile(folder, input.name, fileBlob, false);
+    createFile(folder, input.name, fileBlob);
   });
   inputWidget.append(inputName, inputSize, inputProgress, inputCheck, inputSubmitButton);
   return inputWidget;

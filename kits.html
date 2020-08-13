@@ -1,0 +1,76 @@
+<div id="kits">
+  <div class="row">
+    <div class="col-2 offset-1 flags">
+      <div id="lang_fr">
+        <img src="./assets/pictures/flag_fr.svg" alt="" srcset="" />
+      </div>
+      <div id="lang_en">
+        <img src="./assets/pictures/flag_en.svg" alt="" srcset="" />
+      </div>
+    </div>
+    <div class="col-4 offset-1 center">
+      <h1>Mes kits</h1>
+    </div>
+    <div class="col-4 center">
+      <button class="validButton" data-toggle="modal" data-target="#newKitModal">
+        Nouveau Template de Kit
+      </button>
+    </div>
+  </div>
+  <div id="kitsDisplayer"></div>
+</div>
+
+<div id="newKitModal" class="modal fade">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Ajouter un nouveau template de kit</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <h5>Titre du kit</h5>
+        <input type="text" id="kitTitleInput" />
+        <h5>Lien du questionnaire</h5>
+        <input type="text" id="questionnaireLinkInput" />
+        <h5>Langue du kit</h5>
+        <select id="kitLanguage">
+          <option value="fr">Français</option>
+          <option value="en">Anglais</option>
+        </select>
+        <br />
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn cancelButton" data-dismiss="modal">Annuler</button>
+        <button type="button" class="btn validButton" data-dismiss="modal" id="kitSubmitButton">Créer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="newKitFileModal" class="modal fade">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Ajouter un nouveau document au kit</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <h5>Titre du document</h5>
+        <input type="text" id="kitFileTitleInput" />
+        <h5>Description</h5>
+        <textarea id="kitFileDescriptionInput"></textarea>
+        <input type="checkbox" id="clientEditionInput" style="width: auto; margin-top: 20px;" />
+        <label for="clientEditionInput">Document à Uploader par le Client</label>
+        <br />
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn cancelButton" data-dismiss="modal">Annuler</button>
+        <button type="button" class="btn validButton" data-dismiss="modal" id="kitFileSubmitButton">Ajouter</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $.getScript("./script/kits.js");
+</script>

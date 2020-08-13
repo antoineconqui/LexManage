@@ -1,7 +1,7 @@
-<div id="folders">
+<div id="clients">
   <div class="row">
-    <div class="col-4 offset-md-4 center">
-      <h1>Mes contacts</h1>
+    <div class="col-4 offset-4 center">
+      <h1>Mes clients</h1>
     </div>
     <div class="col-4 center">
       <button class="validButton" data-toggle="modal" data-target="#newClientModal">
@@ -9,7 +9,7 @@
       </button>
     </div>
   </div>
-  <div class="row" id="contactsDisplayer"></div>
+  <div id="clientsDisplayer"></div>
 </div>
 
 <div id="newClientModal" class="modal fade">
@@ -31,13 +31,12 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn cancelButton" data-dismiss="modal">Annuler</button>
-        <button type="button" class="btn validButton" id="clientSubmitButton">Créer</button>
+        <button type="button" class="btn validButton" data-dismiss="modal" id="clientSubmitButton">Créer</button>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-  $.getScript("./script/contacts.js");
-  $.getScript("./script/contacts-admin.js");
+  $.getScript("./script/clients.js");
 </script>

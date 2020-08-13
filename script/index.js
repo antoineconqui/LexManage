@@ -11,8 +11,8 @@ var membersRef;
 
 $(document).ready(() => {
   unSelect();
-  $("#foldersButton").addClass("selected");
-  $("#foldersPage").show();
+  $("#kitsButton").addClass("selected");
+  $("#kitsPage").show();
 });
 
 firebase.auth().onAuthStateChanged(function (user) {
@@ -26,23 +26,28 @@ firebase.auth().onAuthStateChanged(function (user) {
         userData = doc.data();
         userRef = doc.ref;
         if (userData.admin) {
-          if (!getCookie("token")) {
-            window.location.replace("./token.php");
-          } else {
-            getAdminDatas();
-            $("#contactsPage").load("./contacts-admin.html");
-            $("#foldersPage").load("./folders-admin.html");
-          }
+          // if (!getCookie("token")) {
+          //   window.location.replace("./token.php");
+          // } else {
+          getAdminDatas();
+          $("#foldersButton").show();
+          $("#clientsButton").show();
+          $("#kitsButton").show();
+          $("#profileButton").show();
+          $("#foldersPage").load("./folders-admin.html");
+          $("#clientsPage").load("./clients.html");
+          $("#kitsPage").load("./kits.html");
+          // }
         } else {
-          $("#contactsPage").load("./contacts.html");
+          $("#foldersButton").show();
+          $("#profileButton").show();
           $("#foldersPage").load("./folders.html");
         }
       });
     });
-  $("#homePage").load("./home.html");
-  $("#workspacePage").load("./workspace.html");
+  // $("#homePage").load("./home.html");
+  // $("#workspacePage").load("./workspace.html");
   $("#profilePage").load("./profile.html");
-  //les pages folders et contacts changent selon user admin
 });
 
 function getCookie(key) {
@@ -95,23 +100,19 @@ function getAdminDatas() {
 // Menu
 
 function unSelect() {
-  $("#homeButton").removeClass("selected");
   $("#foldersButton").removeClass("selected");
-  $("#contactsButton").removeClass("selected");
-  $("#workspaceButton").removeClass("selected");
+  $("#clientsButton").removeClass("selected");
+  $("#kitsButton").removeClass("selected");
   $("#profileButton").removeClass("selected");
-  $("#homePage").hide();
   $("#foldersPage").hide();
-  $("#contactsPage").hide();
-  $("#workspacePage").hide();
+  $("#clientsPage").hide();
+  $("#kitsPage").hide();
   $("#profilePage").hide();
+  // $("#homeButton").removeClass("selected");
+  // $("#workspaceButton").removeClass("selected");
+  // $("#homePage").hide();
+  // $("#workspacePage").hide();
 }
-
-$("#homeButton").click(() => {
-  unSelect();
-  $("#homeButton").addClass("selected");
-  $("#homePage").show();
-});
 
 $("#foldersButton").click(() => {
   unSelect();
@@ -119,16 +120,16 @@ $("#foldersButton").click(() => {
   $("#foldersPage").show();
 });
 
-$("#contactsButton").click(() => {
+$("#clientsButton").click(() => {
   unSelect();
-  $("#contactsButton").addClass("selected");
-  $("#contactsPage").show();
+  $("#clientsButton").addClass("selected");
+  $("#clientsPage").show();
 });
 
-$("#workspaceButton").click(() => {
+$("#kitsButton").click(() => {
   unSelect();
-  $("#workspaceButton").addClass("selected");
-  $("#workspacePage").show();
+  $("#kitsButton").addClass("selected");
+  $("#kitsPage").show();
 });
 
 $("#profileButton").click(() => {
@@ -136,3 +137,14 @@ $("#profileButton").click(() => {
   $("#profileButton").addClass("selected");
   $("#profilePage").show();
 });
+
+// $("#homeButton").click(() => {
+//   unSelect();
+//   $("#homeButton").addClass("selected");
+//   $("#homePage").show();
+// });
+// $("#workspaceButton").click(() => {
+//   unSelect();
+//   $("#workspaceButton").addClass("selected");
+//   $("#workspacePage").show();
+// });

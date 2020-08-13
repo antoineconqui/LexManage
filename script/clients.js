@@ -1,8 +1,10 @@
 // Init
 
-updateAdminContacts();
+firebase.auth().onAuthStateChanged(() => {
+  updateClients();
+});
 
-// Contacts
+// General Function
 
 function valid(email) {
   return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email);
@@ -16,6 +18,8 @@ function createNewClient() {
     .set({
       admin: userRef,
       contacts: [],
+      folders: [],
+      kits: [],
       members: [userRef],
       name: $("#workspaceNameInput").val(),
     })
@@ -38,30 +42,52 @@ function createNewClient() {
                 clients: clients,
               })
               .then(() => {
-                updateContacts();
-                updateAdminContacts();
-                // sendMailToNewClient($("#clientEmailInput").val(), $("#clientNameInput").val());
-                // createNewFolder();
+                updateClients();
               });
           });
         });
     });
 }
 
-function updateAdminContacts() {
+// Update
+
+function updateClients() {
+  $("#clientsDisplayer").empty();
   userData.workspace.get().then(function (doc) {
     doc.data().clients.forEach((client) => {
       client.get().then((doc) => {
-        doc.data().members.forEach((member) => {
-          member.get().then((doc) => {
-            var contact = doc.data();
-            contact.id = doc.id;
-            contact.ref = doc.ref;
-            displayContact(contact);
-          });
-        });
+        // doc.data().members.forEach((member) => {
+        // member.get().then((doc) => {
+        var client = doc.data();
+        client.id = doc.id;
+        client.ref = doc.ref;
+        displayClient(client);
       });
+      // });
+      // });
     });
+  });
+}
+
+// Display
+
+function displayClient(client) {
+  client.admin.get().then((doc) => {
+    var clientWidget = $("<div class='client row'/>");
+
+    var leftPanel = $('<div class="col-md-6"/>');
+    var clientName = $("<div class='title'>" + client.name + "</div>");
+    // var contactPicture = $('<img class="profilePicture" src="' + contact.profilePicture + '"/>');
+    leftPanel.append(clientName);
+
+    var rightPanel = $('<div class="col-md-6"/>');
+    // var clientDate = $("<div class='clientDate'><b>Client depuis : </b></br><span>" + new Date(client.creationDate.seconds * 1000).toLocaleDateString() + "</span></div>");
+    var clientButton = $("<a href='mailto:" + doc.data().email + "'><button class='clientButton validButton'>Contacter</button></a>");
+    rightPanel.append(clientButton);
+
+    clientWidget.append(leftPanel, rightPanel);
+
+    $("#clientsDisplayer").append(clientWidget);
   });
 }
 

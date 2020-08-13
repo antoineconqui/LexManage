@@ -1,0 +1,46 @@
+faire page kits pour admin
+    liste des kits du workspace
+        updateKits like updateFolders (in folders.js)
+        displayClient like displayAdminFolder(in folders-admin.js)
+
+    ajout manuel de kit
+        createNewKit like createNewFolder (in folders-admin.js)
+            sur le theme de createNewFolder avec le ptit modal et tout
+        ajout du modal dans la page html
+
+    ajout dans le menu de lien vers la page
+
+
+
+page folders admin
+    gestion files préajouté par le template du kit
+        changer fonction updateFiles
+            if versions.length = 0 then createFile
+            if > 0 then updateFile
+    bouton add document
+        changer fonction openFolder
+        updateFiles puis if userdata.admin then add button
+        retirer le bouton en haut de la page
+    
+page user en php avec user id en postUrl
+page folder en php avec folder id en postUrl
+page workspace en php avec workspace id en postUrl
+
+automatiser la création de client et de folder via wordpress woocommerce
+
+-----------------------
+
+        NOTES 
+
+-----------------------
+
+error : lors de la creation d'un client, il faut update la liste des clients définis pour ajouter des kits manuellement
+
+improve : fonction de tri dans les clients (nombre de dossier, date d'ancienneté, etc)
+
+todo : add creationDate attribute to workspace at creation
+
+improve : add logo to workspace
+
+improve : loading circle when login (user friendly)
+

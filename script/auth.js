@@ -14,17 +14,20 @@ var uiConfig = {
         .get()
         .then(function (querySnapshot) {
           if (querySnapshot.empty) {
-            console.log("Vous n'êtes pas encore client, veuillez contacter un membre du service client de lexStart");
+            $("#authTitle").html("<h3>Vous n'êtes pas reconnu comme l'un de nos clients.</br></br>Veuillez contacter un membre du service client de LexStart</h3>");
           } else {
             querySnapshot.forEach((doc) => {
-              doc.ref
-                .update({
-                  name: authResult.user.displayName,
+              if (doc.data().profilePicture == null) {
+                doc.ref.update({
                   profilePicture: authResult.user.photoURL,
-                })
-                .then(() => {
-                  window.location.replace("./index.html");
                 });
+              }
+              if (doc.data().name == null) {
+                doc.ref.update({
+                  name: authResult.user.displayName,
+                });
+              }
+              window.location.replace("./index.html");
             });
           }
         });
@@ -67,6 +70,6 @@ ui.start("#firebaseui-auth-container", uiConfig);
 //       name: $("#workspaceNameInput").val(),
 //     })
 //     .then(() => {
-//       window.location.replace("./auth.html");
+//       window.location.replace("./auth.php");
 //     });
 // });
