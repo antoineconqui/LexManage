@@ -242,7 +242,7 @@ function displayQuestionnaire(folder, f, questionnaire) {
   } else {
     var questionnaireButton = $('<button class="validButton" id="questionnaireButton" data-toggle="modal" data-target="#questionnaireModal">Ouvrir</button>');
     questionnaireButton.click(() => {
-      $("#questionnaireFrame").attr("src", questionnaire.link);
+      $("#questionnaireFrame").attr("src", questionnaire.link + "&licence=34&embed=simple");
 
       // window.addEventListener("message", (message) => {
       //   if (message.data.substr(0, 15) === "request:finish:") {

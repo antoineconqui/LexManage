@@ -75,17 +75,23 @@ function displayClient(client) {
   client.admin.get().then((doc) => {
     var clientWidget = $("<div class='client row'/>");
 
-    var leftPanel = $('<div class="col-md-6"/>');
-    var clientName = $("<div class='title'>" + client.name + "</div>");
-    // var contactPicture = $('<img class="profilePicture" src="' + contact.profilePicture + '"/>');
-    leftPanel.append(clientName);
+    var clientInfos = $('<div class="col-md-4">' + client.name + "</div>");
+    if (contactPicture != null) {
+      var contactPicture = $('<img class="profilePicture" src="' + contact.profilePicture + '"/>');
+      clientInfos.append(contactPicture);
+    }
 
-    var rightPanel = $('<div class="col-md-6"/>');
-    // var clientDate = $("<div class='clientDate'><b>Client depuis : </b></br><span>" + new Date(client.creationDate.seconds * 1000).toLocaleDateString() + "</span></div>");
-    var clientButton = $("<a href='mailto:" + doc.data().email + "'><button class='clientButton validButton'>Contacter</button></a>");
-    rightPanel.append(clientButton);
+    var contactButton = $("<div class='col-md-4'><a href='mailto:" + doc.data().email + "'><button class='folderButton validButton'>Contacter ce client</button></a></div>");
+    var folderButton = $("<div class='col-md-4'><button class='folderButton validButton'>Créer un dossier pour ce client</button></div>");
+    folderButton.click(() => {
+      unSelect();
+      $("#foldersButton").addClass("selected");
+      $("#foldersPage").show();
+      $("#newFolderButton").click();
+      // $('option#inputClient [value="essence"]').prop('selected', true);
+    });
 
-    clientWidget.append(leftPanel, rightPanel);
+    clientWidget.append(clientInfos, contactButton, folderButton);
 
     $("#clientsDisplayer").append(clientWidget);
   });

@@ -1,6 +1,6 @@
-<script src="https://lexstart.ca/lexmanage/assets/firebase-app.js"></script>
-<script src="https://lexstart.ca/lexmanage/assets/firebase-firestore.js"></script>
-<script src="https://lexstart.ca/lexmanage/script/config.js"></script>
+<script src="https://test.lexstart.ca/lexmanage/assets/firebase-app.js"></script>
+<script src="https://test.lexstart.ca/lexmanage/assets/firebase-firestore.js"></script>
+<script src="https://test.lexstart.ca/lexmanage/script/config.js"></script>
 
 <script>  
   var folderRef = database.collection("folders").doc();

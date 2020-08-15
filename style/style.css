@@ -350,7 +350,7 @@ li > img {
 }
 
 .folderButton,
-.clientButton {
+.buttons {
   position: absolute;
   right: 20px;
   bottom: 0;
