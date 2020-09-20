@@ -27,7 +27,7 @@ var uiConfig = {
                   name: authResult.user.displayName,
                 });
               }
-              window.location.replace("./index.html");
+              window.location.replace("./index.php");
             });
           }
         });
