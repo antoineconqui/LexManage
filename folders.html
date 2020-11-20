@@ -26,6 +26,14 @@
       </div>
       <div class="modal-body">
         <div id="parentFrame">
+          <script lang="text/javascript">
+            $(window).on({
+              message: function (e) {
+                console.log(e);
+                // receiveMessageFromQuestionnaire(e);
+              }
+            });
+          </script>
           <iframe id="questionnaireFrame" src=""> </iframe>
         </div>
       </div>

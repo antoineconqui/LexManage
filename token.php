@@ -1,7 +1,8 @@
 <?php 
 
 if(!isset($_GET['code'])){
-    header('Location: https://ca1.contractexpress.com/IdServ/core/connect/authorize?client_id=antoine&redirect_uri=https://test.lexstart.ca/lexmanage/token.php&scope=CEAPI&response_type=code');
+    echo 'test';
+    header('Location: https://ca1.contractexpress.com/IdServ/core/connect/authorize?client_id=antoine&redirect_uri=http://localhost/lexmanage/token.php&scope=CEAPI&response_type=code');
 }
 else{
     $code = $_GET['code'];
@@ -15,15 +16,17 @@ else{
       CURLOPT_FOLLOWLOCATION => true,
       CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
       CURLOPT_CUSTOMREQUEST => "POST",
-      CURLOPT_POSTFIELDS => "grant_type=authorization_code&redirect_uri=https%3A//test.lexstart.ca/lexmanage/token.php&code=".$code,
+      CURLOPT_POSTFIELDS => "grant_type=authorization_code&redirect_uri=http://localhost/lexmanage/token.php&code=".$code,
       CURLOPT_HTTPHEADER => array(
-        "Authorization: Basic YW50b2luZTo2OWJhZmQ2ZS1mZTVhLTQ2YjYtYWJjMS0zZDA1Y2E4NWU3Njc="
+        "Authorization: Basic YW50b2luZTpkZGJhNmExZS03ODY1LTQ0N2YtOTdjNi1iZGQzYTA4MzIxYWY="
       ),
     ));
+    // lexmanage
+    // 2a46494c-3aeb-4a3c-b076-1eccbff69e9b
     
     setcookie("token", json_decode(curl_exec($curl))->{'access_token'}, time()+1800);
     curl_close($curl);
-    header('Location: http://test.lexstart.ca/lexmanage/');
+    header('Location: http://localhost/lexmanage/');
 
 }
 

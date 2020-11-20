@@ -70,11 +70,11 @@ function lexmanage($order_id){
 	$data = $order->get_data();
 	$items = $order->get_items();
 	foreach ( $items as $item ) {
-		newFolder($data['billing']['email'], $data['billing']['first_name'].' '.$data['billing']['last_name'], $item['name'], $data['id']);
+		newFolder($data['billing']['email'], $data['billing']['first_name'].' '.$data['billing']['last_name'], $item['name'], $item->get_product_id(), $data['id']);
 	}
 }
 
-function newFolder($email, $name, $product, $id){
+function newFolder($email, $name, $product, $product_id, $id){
 
 	echo '
 	<script>

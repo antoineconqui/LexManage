@@ -26,18 +26,18 @@ firebase.auth().onAuthStateChanged(function (user) {
         userData = doc.data();
         userRef = doc.ref;
         if (userData.admin) {
-          // if (!getCookie("token")) {
-          //   window.location.replace("./token.php");
-          // } else {
-          getAdminDatas();
-          $("#foldersButton").show();
-          $("#clientsButton").show();
-          $("#kitsButton").show();
-          $("#profileButton").show();
-          $("#foldersPage").load("./folders-admin.html");
-          $("#clientsPage").load("./clients.html");
-          $("#kitsPage").load("./kits.html");
-          // }
+          if (!getCookie("token")) {
+            window.location.replace("./token.php");
+          } else {
+            getAdminDatas();
+            $("#foldersButton").show();
+            $("#clientsButton").show();
+            $("#kitsButton").show();
+            $("#profileButton").show();
+            $("#foldersPage").load("./folders-admin.html");
+            $("#clientsPage").load("./clients.html");
+            $("#kitsPage").load("./kits.html");
+          }
         } else {
           $("#foldersButton").show();
           $("#profileButton").show();

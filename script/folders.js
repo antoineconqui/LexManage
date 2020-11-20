@@ -235,6 +235,39 @@ function displayFolder(folder) {
   });
 }
 
+function createContract(template, accessToken) {
+
+  var userSettings = null;
+  var request = new HttpRequestMessage(HttpMethod.Get, _apiBaseUrl + "/account/settings");
+  request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+
+  var response = _client.SendAsync(request).Result;
+
+  if (response.IsSuccessStatusCode) {
+    var content = response.Content.ReadAsStringAsync().Result;
+    if (content != null) {
+      userSettings = JsonConvert.DeserializeObject(content);
+    }
+  }
+
+  var contractId = null;
+
+  var url = _apiBaseUrl + string.Format("/folders/{0}/contracts?template={1}&minor=true", userSettings.HomeFolderId, Uri.EscapeDataString(template));
+
+  var request = new HttpRequestMessage(HttpMethod.Post, url);
+  request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+
+  var response = _client.SendAsync(request).Result;
+  if (response.IsSuccessStatusCode) {
+    var content = response.Content.ReadAsStringAsync().Result;
+    if (content != null) {
+      var contract = JsonConvert.DeserializeObject(content);
+      contractId = contract.ContractId;
+    }
+  }
+
+}
+
 function displayQuestionnaire(folder, f, questionnaire) {
   var questionnaireWidget = $('<div class="questionnaire"><h5>Questionnaire - ' + folder.title + "</h5></div>");
   if (userData.admin || questionnaire.complete) {
@@ -244,22 +277,23 @@ function displayQuestionnaire(folder, f, questionnaire) {
     questionnaireButton.click(() => {
       $("#questionnaireFrame").attr("src", questionnaire.link + "&licence=34&embed=simple");
 
-      // window.addEventListener("message", (message) => {
-      //   if (message.data.substr(0, 15) === "request:finish:") {
-      //     $("#questionnaireModal").modal("toggle");
+      window.addEventListener("message", (message) => {
+        console.log('MESSAAAAAAAAAAAAAAAAAAAAGE')
+        // if (message.data.substr(0, 15) === "request:finish:") {
+        //   $("#questionnaireModal").modal("toggle");
 
-      //     questionnaire.complete = true;
-      //     questionnaire.id = message.data.substr(16);
-      //     folder.ref.get().then((doc) => {
-      //       var files = doc.data().files;
-      //       files[f] = questionnaire;
-      //       folder.ref.update({
-      //         files: files,
-      //       });
-      //     });
-      //     sendMails(folder);
-      //   }
-      // });
+        //   questionnaire.complete = true;
+        //   questionnaire.id = message.data.substr(16);
+        //   folder.ref.get().then((doc) => {
+        //     var files = doc.data().files;
+        //     files[f] = questionnaire;
+        //     folder.ref.update({
+        //       files: files,
+        //     });
+        //   });
+        //   sendMails(folder);
+        // }
+      });
     });
     // && questionnaire.complete
     // console.log(userData.admin, questionnaire.id);
@@ -288,7 +322,7 @@ function displayFile(folder, file) {
     }
   }
   var shareButton = $("<div><button class='validButton'>Share</button></div>");
-  shareButton.click(() => {});
+  shareButton.click(() => { });
   var deleteButton = $("<button class='cancelButton'>Delete</button>");
   deleteButton.click(() => {
     var confirmation = confirm("Etes vous sûr de vouloir supprimer ?");
